@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Compliance Copilot',
+  title: 'Compliance Assist',
   description: 'Your AI partner for navigating GCP compliance.',
 };
 
