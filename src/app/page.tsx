@@ -13,6 +13,11 @@ import { BrainCircuit, FileText, Send, Loader, Bot, ExternalLink, ChevronRight, 
 import { useToast } from "@/hooks/use-toast";
 import { CodeBlock } from '@/components/code-block';
 import { Separator } from '@/components/ui/separator';
+import * as pdfjsLib from 'pdfjs-dist';
+import mammoth from 'mammoth';
+import * as XLSX from 'xlsx';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export default function CompliancePage() {
   const { toast } = useToast();
@@ -23,23 +28,70 @@ export default function CompliancePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showSteps, setShowSteps] = useState(false);
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.type === 'text/plain') {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          setDocumentContent(event.target?.result as string);
-          setFileName(file.name);
-        };
-        reader.readAsText(file);
-      } else {
+    if (!file) {
+      return;
+    }
+
+    setFileName('');
+    setDocumentContent('');
+    setIsLoading(true);
+
+    const supportedTypes = ['.txt', '.pdf', '.docx', '.xlsx'];
+    const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
+
+    if (!supportedTypes.includes(fileExtension)) {
         toast({
-          variant: "destructive",
-          title: "Invalid file type",
-          description: "Please upload a plain text (.txt) file.",
+            variant: "destructive",
+            title: "Unsupported file type",
+            description: `Please upload one of the following file types: ${supportedTypes.join(', ')}`,
         });
+        setIsLoading(false);
+        return;
+    }
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      let textContent = '';
+      
+      if (file.name.endsWith('.txt')) {
+        textContent = new TextDecoder().decode(arrayBuffer);
+      } else if (file.name.endsWith('.pdf')) {
+        const typedarray = new Uint8Array(arrayBuffer);
+        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+        let pdfText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const text = await page.getTextContent();
+          pdfText += text.items.map(s => (s as any).str).join(' ');
+        }
+        textContent = pdfText;
+      } else if (file.name.endsWith('.docx')) {
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        textContent = result.value;
+      } else if (file.name.endsWith('.xlsx')) {
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        let excelContent = '';
+        workbook.SheetNames.forEach(sheetName => {
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          excelContent += json.map(row => (row as any[]).join(' ')).join('\n');
+        });
+        textContent = excelContent;
       }
+      
+      setDocumentContent(textContent);
+      setFileName(file.name);
+    } catch (error) {
+        console.error("Error parsing file:", error);
+        toast({
+            variant: "destructive",
+            title: "File parsing error",
+            description: "Could not read the content of the file. It may be corrupted.",
+        });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,8 +101,8 @@ export default function CompliancePage() {
     if (!documentContent) {
       toast({
         variant: "destructive",
-        title: "No document uploaded",
-        description: "Please upload a compliance document.",
+        title: "No document loaded",
+        description: "Please upload and wait for a compliance document to be processed.",
       });
       return;
     }
@@ -86,6 +138,10 @@ export default function CompliancePage() {
     }
   };
 
+  const loadingText = isLoading && !result ? 
+    (fileName && !documentContent ? 'Parsing document...' : 'Generating compliance guidance') : 
+    'Generating compliance guidance';
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -109,14 +165,15 @@ export default function CompliancePage() {
                     <p className="mb-2 text-sm text-muted-foreground text-center">
                       <span className="font-semibold">Click to upload</span>
                     </p>
-                    <p className="text-xs text-muted-foreground">TXT files only</p>
+                    <p className="text-xs text-muted-foreground">TXT, PDF, DOCX, XLSX</p>
                   </div>
                   <Input
                     id="doc-upload"
                     type="file"
                     className="hidden"
-                    accept="text/plain"
+                    accept=".txt,.pdf,.docx,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     onChange={handleFileChange}
+                    disabled={isLoading}
                   />
                 </Label>
               </div>
@@ -127,7 +184,9 @@ export default function CompliancePage() {
                     <FileText className="w-6 h-6 text-primary" />
                     <div>
                       <p className="font-medium">{fileName}</p>
-                      <p className="text-xs text-muted-foreground">Document loaded.</p>
+                      <p className="text-xs text-muted-foreground">
+                        {documentContent ? 'Document loaded.' : 'Parsing...'}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -141,15 +200,16 @@ export default function CompliancePage() {
                 className="flex-1 resize-none bg-background"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
+                disabled={isLoading}
               />
             </div>
           </SidebarContent>
           <SidebarFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || !documentContent}>
               {isLoading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Asking...
+                  {fileName && !documentContent ? 'Parsing...' : 'Asking...'}
                 </>
               ) : (
                 <>
@@ -170,7 +230,7 @@ export default function CompliancePage() {
           {isLoading && (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <Loader className="w-12 h-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-semibold">Generating compliance guidance</p>
+              <p className="text-lg font-semibold">{loadingText}</p>
               <p className="text-muted-foreground">Please wait while our AI analyzes your request...</p>
             </div>
           )}
