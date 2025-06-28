@@ -24,7 +24,7 @@ const ComplianceQuestionAnsweringOutputSchema = z.object({
       gcpSdkCommand: z.string().describe('The GCP SDK command for the step.'),
     })
   ).describe('Step-by-step instructions for implementing the compliance measure on GCP.'),
-  googleCloudDocUrl: z.string().url().optional().describe('A relevant Google Cloud documentation URL to learn more.'),
+  googleCloudDocUrl: z.string().optional().describe('A relevant Google Cloud documentation URL to learn more.'),
 });
 export type ComplianceQuestionAnsweringOutput = z.infer<typeof ComplianceQuestionAnsweringOutputSchema>;
 
