@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, FileText, Send, Loader, Upload, ExternalLink, Info, User, AlertCircle } from 'lucide-react';
+import { Bot, FileText, Send, Loader, Upload, ExternalLink, Info, User, AlertCircle, Wrench } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { CodeBlock } from '@/components/code-block';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -17,13 +17,17 @@ import mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
+type ImplementationStep = ComplianceQuestionAnsweringOutput['implementationSteps'][0];
+
 type Message = {
+  id: number;
   role: 'user' | 'ai';
   content: string;
+  implementationSteps?: ImplementationStep[];
+  googleCloudDocUrl?: string;
 };
 
 export default function CompliancePage() {
@@ -31,10 +35,12 @@ export default function CompliancePage() {
   const [question, setQuestion] = useState("");
   const [documentContent, setDocumentContent] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
-  const [result, setResult] = useState<ComplianceQuestionAnsweringOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [activeTab, setActiveTab] = useState("chat");
+  const [selectedImplementationSteps, setSelectedImplementationSteps] = useState<ImplementationStep[] | null>(null);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const scrollToBottom = () => {
@@ -52,7 +58,8 @@ export default function CompliancePage() {
     setFileName('');
     setDocumentContent('');
     setMessages([]);
-    setResult(null);
+    setSelectedImplementationSteps(null);
+    setActiveTab("chat");
     setIsParsing(true);
 
     const supportedTypes = ['.txt', '.pdf', '.docx', '.xlsx'];
@@ -100,7 +107,11 @@ export default function CompliancePage() {
       
       setDocumentContent(textContent);
       setFileName(file.name);
-      setMessages([{ role: 'ai', content: `Document "${file.name}" loaded. How can I help you with your compliance requirements?` }]);
+      setMessages([{ 
+        id: Date.now(), 
+        role: 'ai', 
+        content: `Document "${file.name}" loaded. How can I help you with your compliance requirements?` 
+      }]);
     } catch (error) {
         console.error("Error parsing file:", error);
         toast({
@@ -111,6 +122,11 @@ export default function CompliancePage() {
     } finally {
       setIsParsing(false);
     }
+  };
+
+  const handleImplementClick = (steps: ImplementationStep[]) => {
+    setSelectedImplementationSteps(steps);
+    setActiveTab('implementation');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,27 +142,43 @@ export default function CompliancePage() {
       return;
     }
 
-    const newMessages: Message[] = [...messages, { role: 'user', content: question }];
+    const userMessage: Message = { id: Date.now(), role: 'user', content: question };
+    const newMessages = [...messages, userMessage];
     setMessages(newMessages);
     setQuestion('');
     setIsLoading(true);
-    setResult(null);
 
     try {
       const aiResult = await complianceQuestionAnswering({
         complianceDocuments: documentContent,
         userQuestion: question,
       });
-      setResult(aiResult);
-      setMessages([...newMessages, { role: 'ai', content: aiResult.answer }]);
+
+      const aiMessage: Message = {
+        id: Date.now() + 1,
+        role: 'ai',
+        content: aiResult.answer,
+        implementationSteps: aiResult.implementationSteps,
+        googleCloudDocUrl: aiResult.googleCloudDocUrl
+      };
+      setMessages([...newMessages, aiMessage]);
+
+      if (aiResult.implementationSteps && aiResult.implementationSteps.length > 0 && !selectedImplementationSteps) {
+        setSelectedImplementationSteps(aiResult.implementationSteps);
+      }
+
     } catch (error) {
       console.error("Error calling AI:", error);
-      const errorMessage = "Sorry, I encountered an error while processing your request. Please try again.";
-      setMessages([...newMessages, { role: 'ai', content: errorMessage }]);
+      const errorMessage: Message = { 
+        id: Date.now() + 1,
+        role: 'ai', 
+        content: "Sorry, I encountered an error while processing your request. Please try again."
+      };
+      setMessages([...newMessages, errorMessage]);
       toast({
         variant: "destructive",
         title: "An error occurred",
-        description: "Failed to get a response from the AI.",
+        description: "Failed to get a response from the AI. The response may have been blocked due to safety settings.",
       });
     } finally {
       setIsLoading(false);
@@ -215,30 +247,46 @@ export default function CompliancePage() {
           <CardContent className="text-sm text-muted-foreground space-y-2">
             <p>1. Upload a compliance document (e.g., GDPR, HIPAA text).</p>
             <p>2. Ask specific questions about the document in the chat.</p>
-            <p>3. View AI-generated answers in the chat and find implementation steps in the dedicated tab.</p>
+            <p>3. Use the 'Implement' button on an answer to see the steps in the Implementation tab.</p>
           </CardContent>
         </Card>
       </aside>
 
       <main className="flex-1 flex flex-col h-screen">
-        <Tabs defaultValue="chat" className="flex-1 flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
             <div className="p-4 border-b">
                 <TabsList>
                     <TabsTrigger value="chat">Chat</TabsTrigger>
-                    <TabsTrigger value="implementation" disabled={!result || result.implementationSteps.length === 0}>Implementation</TabsTrigger>
+                    <TabsTrigger value="implementation" disabled={!selectedImplementationSteps}>Implementation</TabsTrigger>
                 </TabsList>
             </div>
             <TabsContent value="chat" className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {messages.map((message, index) => (
-                        <div key={index} className={cn("flex items-start gap-4", message.role === 'user' ? "justify-end" : "")}>
+                    {messages.map((message) => (
+                        <div key={message.id} className={cn("flex items-start gap-4", message.role === 'user' ? "justify-end" : "")}>
                             {message.role === 'ai' && (
                                 <Avatar className="w-8 h-8">
                                     <AvatarFallback><Bot className="w-5 h-5"/></AvatarFallback>
                                 </Avatar>
                             )}
-                            <div className={cn("max-w-[75%] rounded-lg p-3", message.role === 'user' ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                            <div className={cn("max-w-[75%] rounded-lg p-3", message.role === 'user' ? "bg-primary text-primary-foreground" : "bg-card border")}>
                                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                {message.role === 'ai' && (message.googleCloudDocUrl || (message.implementationSteps && message.implementationSteps.length > 0)) && (
+                                  <div className="mt-4 flex flex-wrap gap-2">
+                                    {message.googleCloudDocUrl && (
+                                      <Button asChild variant="outline" size="sm">
+                                        <a href={message.googleCloudDocUrl} target="_blank" rel="noopener noreferrer">
+                                          <Info className="mr-2 h-4 w-4" /> Know More
+                                        </a>
+                                      </Button>
+                                    )}
+                                    {message.implementationSteps && message.implementationSteps.length > 0 && (
+                                      <Button variant="secondary" size="sm" onClick={() => handleImplementClick(message.implementationSteps!)}>
+                                        <Wrench className="mr-2 h-4 w-4" /> Implement
+                                      </Button>
+                                    )}
+                                  </div>
+                                )}
                             </div>
                              {message.role === 'user' && (
                                 <Avatar className="w-8 h-8">
@@ -293,7 +341,7 @@ export default function CompliancePage() {
                 </div>
             </TabsContent>
             <TabsContent value="implementation" className="flex-1 overflow-y-auto p-6">
-              {result && result.implementationSteps.length > 0 ? (
+              {selectedImplementationSteps && selectedImplementationSteps.length > 0 ? (
                  <Card>
                   <CardHeader>
                     <CardTitle className="font-headline text-2xl">Implementation Steps</CardTitle>
@@ -301,7 +349,7 @@ export default function CompliancePage() {
                   </CardHeader>
                   <CardContent>
                     <Accordion type="multiple" className="w-full space-y-2">
-                      {result.implementationSteps.map((item, index) => (
+                      {selectedImplementationSteps.map((item, index) => (
                         <AccordionItem key={index} value={`item-${index}`} className="bg-muted/50 rounded-lg border px-4">
                           <AccordionTrigger className="text-left hover:no-underline">
                             <span className="font-semibold">Step {index + 1}:</span> {item.step}
@@ -315,7 +363,7 @@ export default function CompliancePage() {
                     <div className="mt-6 flex justify-end">
                       <Button asChild>
                         <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">
-                          Implement on GCP
+                          Open GCP Console
                           <ExternalLink className="ml-2 h-4 w-4" />
                         </a>
                       </Button>
@@ -325,9 +373,9 @@ export default function CompliancePage() {
               ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                     <AlertCircle className="w-16 h-16 mb-4" />
-                    <h3 className="text-2xl font-bold font-headline text-foreground">No Implementation Steps</h3>
+                    <h3 className="text-2xl font-bold font-headline text-foreground">No Implementation Steps Selected</h3>
                     <p className="max-w-md">
-                      Ask a question that results in actionable steps to see them here.
+                      Click the 'Implement' button on a chat answer to see the steps here.
                     </p>
                 </div>
               )}

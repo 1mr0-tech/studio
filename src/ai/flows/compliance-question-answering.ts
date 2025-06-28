@@ -24,6 +24,7 @@ const ComplianceQuestionAnsweringOutputSchema = z.object({
       gcpSdkCommand: z.string().describe('The GCP SDK command for the step.'),
     })
   ).describe('Step-by-step instructions for implementing the compliance measure on GCP.'),
+  googleCloudDocUrl: z.string().url().optional().describe('A relevant Google Cloud documentation URL to learn more.'),
 });
 export type ComplianceQuestionAnsweringOutput = z.infer<typeof ComplianceQuestionAnsweringOutputSchema>;
 
@@ -36,26 +37,15 @@ const complianceQuestionAnsweringPrompt = ai.definePrompt({
   input: {schema: ComplianceQuestionAnsweringInputSchema},
   output: {schema: ComplianceQuestionAnsweringOutputSchema},
   prompt: `You are an expert compliance officer specializing in GCP implementations.
+  
+  Analyze the provided compliance documents and the user's question to perform the following tasks:
 
-  You will use the provided compliance documents to answer the user's question accurately and concisely. You will also generate step-by-step instructions on how to implement the compliance measure on GCP, including the GCP services and configurations required, and the corresponding GCP SDK commands.
+  1.  **Answer the Question**: Provide a clear, concise answer to the user's question based strictly on the provided compliance documents.
+  2.  **Generate Implementation Steps**: Create a step-by-step guide for implementing the compliance measure on GCP. Include specific GCP services, required configurations, and the corresponding GCP SDK commands. If a step requires the GCP Console, provide those instructions instead.
+  3.  **Provide Documentation**: Find a single, highly relevant Google Cloud documentation URL that offers more information on the core topic of the answer.
 
   Compliance Documents: {{{complianceDocuments}}}
-  User Question: {{{userQuestion}}}
-
-  Format your response as follows:
-
-  Answer: [Your answer to the user's question]
-  Implementation Steps:
-  1. [Step 1]: [GCP SDK Command]
-  2. [Step 2]: [GCP SDK Command]
-  3. ...
-
-  Important Considerations:
-
-  Assume the user has a basic understanding of GCP.
-  Focus on providing practical and actionable guidance.
-  Ensure that the GCP SDK commands are accurate and up-to-date.
-  If a step cannot be implemented via GCP SDK, explain how to achieve the same result through the GCP Console.`,
+  User Question: {{{userQuestion}}}`,
 });
 
 const complianceQuestionAnsweringFlow = ai.defineFlow(
