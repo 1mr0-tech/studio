@@ -340,7 +340,7 @@ export default function CompliancePage() {
                     </form>
                 </div>
             </TabsContent>
-            <TabsContent value="implementation" className="flex-1 overflow-y-auto p-4 pt-0 mt-0">
+            <TabsContent value="implementation" className="flex-1 overflow-y-auto p-4 mt-0">
               {selectedImplementationSteps && selectedImplementationSteps.length > 0 ? (
                  <Card>
                   <CardHeader>
@@ -352,9 +352,9 @@ export default function CompliancePage() {
                       {selectedImplementationSteps.map((item, index) => (
                         <AccordionItem key={index} value={`item-${index}`} className="bg-muted/50 rounded-lg border px-4">
                           <AccordionTrigger className="text-left hover:no-underline">
-                            <span className="flex-1 text-left min-w-0">
+                             <div className="flex-1 text-left">
                                 <span className="font-semibold">Step {index + 1}:</span> {item.step}
-                            </span>
+                            </div>
                           </AccordionTrigger>
                           <AccordionContent className="pt-2">
                             <CodeBlock code={item.gcpSdkCommand} />
