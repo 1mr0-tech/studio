@@ -1,8 +1,12 @@
-'use server';
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-// == Compliance Question Answering Flow ==
+/**
+ * @fileOverview An AI agent for answering questions about compliance and using general knowledge.
+ * This file defines two main flows:
+ * - complianceQuestionAnswering: Answers questions based on provided compliance documents.
+ * - useImagination: Answers questions using the AI's general knowledge.
+ */
 
 const ComplianceQuestionAnsweringInputSchema = z.object({
   complianceDocuments: z.string().describe('The uploaded compliance documents.'),
@@ -31,6 +35,7 @@ const ComplianceQuestionAnsweringOutputSchema = z.object({
 export type ComplianceQuestionAnsweringOutput = z.infer<typeof ComplianceQuestionAnsweringOutputSchema>;
 
 export async function complianceQuestionAnswering(input: ComplianceQuestionAnsweringInput): Promise<ComplianceQuestionAnsweringOutput> {
+  'use server';
   return complianceQuestionAnsweringFlow(input);
 }
 
@@ -76,6 +81,7 @@ export const ImaginationOutputSchema = z.object({
 export type ImaginationOutput = z.infer<typeof ImaginationOutputSchema>;
 
 export async function useImagination(input: ImaginationInput): Promise<ImaginationOutput> {
+  'use server';
   return useImaginationFlow(input);
 }
 
