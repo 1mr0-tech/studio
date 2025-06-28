@@ -18,7 +18,7 @@ export type ComplianceQuestionAnsweringInput = z.infer<typeof ComplianceQuestion
 
 const ImplementationStepSchema = z.object({
     step: z.string().describe('A step to implement the compliance measure.'),
-    command: z.string().describe('The command-line interface (CLI) command for the step (e.g., gcloud, aws, az).'),
+    command: z.string().optional().describe('The command-line interface (CLI) command for the step (e.g., gcloud, aws, az).'),
     bestPractice: z.string().optional().describe('An industry best practice related to this step.'),
 });
 
