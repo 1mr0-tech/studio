@@ -340,7 +340,7 @@ export default function CompliancePage() {
                     </form>
                 </div>
             </TabsContent>
-            <TabsContent value="implementation" className="flex-1 overflow-y-auto p-6">
+            <TabsContent value="implementation" className="flex-1 overflow-y-auto p-6 pt-4">
               {selectedImplementationSteps && selectedImplementationSteps.length > 0 ? (
                  <Card>
                   <CardHeader>
