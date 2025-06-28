@@ -352,7 +352,7 @@ export default function CompliancePage() {
                       {selectedImplementationSteps.map((item, index) => (
                         <AccordionItem key={index} value={`item-${index}`} className="bg-muted/50 rounded-lg border px-4">
                           <AccordionTrigger className="text-left hover:no-underline">
-                             <div className="flex-1 text-left">
+                             <div className="flex-1 pr-4">
                                 <span className="font-semibold">Step {index + 1}:</span> {item.step}
                             </div>
                           </AccordionTrigger>
