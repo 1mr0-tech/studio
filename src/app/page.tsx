@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
-import { complianceQuestionAnswering, type ComplianceQuestionAnsweringOutput, useImagination } from '@/ai/flows/compliance-question-answering';
+import { complianceQuestionAnswering, type ComplianceQuestionAnsweringOutput, useImagination } from '@/server/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -251,7 +251,7 @@ export default function CompliancePage() {
     } finally {
         setIsImaginationLoading(false);
     }
-  }
+  };
 
   const renderImplementationSteps = (steps: ImplementationStep[] | undefined) => {
     if (!steps || steps.length === 0) {
@@ -284,7 +284,7 @@ export default function CompliancePage() {
             </Accordion>
         </div>
     );
-  }
+  };
 
   const documentsAvailable = uploadedDocuments.length > 0;
   
