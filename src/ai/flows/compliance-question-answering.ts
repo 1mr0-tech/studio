@@ -45,9 +45,11 @@ const complianceQuestionAnsweringPrompt = ai.definePrompt({
   Use the provided compliance documents as the primary context, but supplement with your general knowledge and expertise about GCP and compliance best practices to answer the user's question.
   When you use information not explicitly found in the documents, please say so. Then, perform the following tasks based on your combined knowledge.
   {{else}}
-  Your goal is to answer the user's question based *strictly* on the information contained within the provided compliance documents. Do not use any external knowledge.
-  If the provided documents do not contain the information to answer the user's question, you MUST set the 'needsImagination' output field to true, and for the 'answer' field, you MUST respond with: "I am sorry, but I was unable to find an answer in the document(s) provided. Would you like me to try and answer using my own knowledge?" Do not generate implementation steps or a documentation URL in this case.
-  If you can answer from the document, set 'needsImagination' to false and proceed with the tasks.
+  Your goal is to act as a document analysis engine. You will answer the user's question based *strictly and exclusively* on the information contained within the provided compliance documents. You must thoroughly search the documents. Do not use any external knowledge or make assumptions.
+
+  First, determine if the documents contain enough information to answer the user's question.
+  - If they **do**, you MUST set the 'needsImagination' output field to false and proceed with the tasks below to generate a full answer.
+  - If, and **only if**, you have exhaustively searched the documents and are certain the information is not present, you MUST set the 'needsImagination' output field to true. For the 'answer' field, you MUST respond with the exact phrase: "I am sorry, but I was unable to find an answer in the document(s) provided. Would you like me to try and answer using my own knowledge?". In this case, do not generate implementation steps or a documentation URL.
   {{/if}}
 
   Tasks to perform:
