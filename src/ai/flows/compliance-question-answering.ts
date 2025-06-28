@@ -13,17 +13,19 @@ import {z} from 'genkit';
 const ComplianceQuestionAnsweringInputSchema = z.object({
   complianceDocuments: z.string().describe('The uploaded compliance documents.'),
   userQuestion: z.string().describe('The user question about compliance requirements.'),
+  useImagination: z.boolean().optional().describe('Whether to use imagination for a better answer.'),
 });
 export type ComplianceQuestionAnsweringInput = z.infer<typeof ComplianceQuestionAnsweringInputSchema>;
 
 const ComplianceQuestionAnsweringOutputSchema = z.object({
+  needsImagination: z.boolean().describe('Whether the model suggests using imagination for a better answer.'),
   answer: z.string().describe('The answer to the user question.'),
   implementationSteps: z.array(
     z.object({
       step: z.string().describe('A step to implement the compliance measure.'),
       gcpSdkCommand: z.string().describe('The GCP SDK command for the step.'),
     })
-  ).describe('Step-by-step instructions for implementing the compliance measure on GCP.'),
+  ).optional().describe('Step-by-step instructions for implementing the compliance measure on GCP.'),
   googleCloudDocUrl: z.string().optional().describe('A relevant Google Cloud documentation URL to learn more.'),
 });
 export type ComplianceQuestionAnsweringOutput = z.infer<typeof ComplianceQuestionAnsweringOutputSchema>;
@@ -38,9 +40,18 @@ const complianceQuestionAnsweringPrompt = ai.definePrompt({
   output: {schema: ComplianceQuestionAnsweringOutputSchema},
   prompt: `You are an expert compliance officer specializing in GCP implementations.
   
-  Analyze the provided compliance documents and the user's question to perform the following tasks:
+  {{#if useImagination}}
+  Your goal is to provide the most helpful and comprehensive answer possible.
+  Use the provided compliance documents as the primary context, but supplement with your general knowledge and expertise about GCP and compliance best practices to answer the user's question.
+  When you use information not explicitly found in the documents, please say so. Then, perform the following tasks based on your combined knowledge.
+  {{else}}
+  Your goal is to answer the user's question based *strictly* on the information contained within the provided compliance documents. Do not use any external knowledge.
+  If the provided documents do not contain the information to answer the user's question, you MUST set the 'needsImagination' output field to true, and for the 'answer' field, you MUST respond with: "I am sorry, but I was unable to find an answer in the document(s) provided. Would you like me to try and answer using my own knowledge?" Do not generate implementation steps or a documentation URL in this case.
+  If you can answer from the document, set 'needsImagination' to false and proceed with the tasks.
+  {{/if}}
 
-  1.  **Answer the Question**: Provide a clear, concise answer to the user's question based strictly on the provided compliance documents.
+  Tasks to perform:
+  1.  **Answer the Question**: Provide a clear, concise answer to the user's question.
   2.  **Generate Implementation Steps**: Create a step-by-step guide for implementing the compliance measure on GCP. Include specific GCP services, required configurations, and the corresponding GCP SDK commands. If a step requires the GCP Console, provide those instructions instead.
   3.  **Provide Documentation**: Find a single, highly relevant Google Cloud documentation URL that offers more information on the core topic of the answer.
 
