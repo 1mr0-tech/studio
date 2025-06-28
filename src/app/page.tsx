@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
-import { complianceQuestionAnswering, type ComplianceQuestionAnsweringOutput } from '@/ai/flows/compliance-question-answering';
-import { useImagination } from '@/ai/flows/imagination-flow';
+import { complianceQuestionAnswering, type ComplianceQuestionAnsweringOutput, useImagination } from '@/ai/flows/compliance-question-answering';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
