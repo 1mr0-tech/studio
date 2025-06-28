@@ -2,11 +2,10 @@
 /**
  * @fileOverview An AI agent for answering questions using general knowledge.
  *
- * - useImagination - A function that answers user questions using general knowledge.
+ * - useImagination - A function that answers user questions from general knowledge.
  * - ImaginationInput - The input type for the useImagination function.
  * - ImaginationOutput - The return type for the useImagination function.
  */
-
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
