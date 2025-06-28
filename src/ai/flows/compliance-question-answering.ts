@@ -45,11 +45,14 @@ const complianceQuestionAnsweringPrompt = ai.definePrompt({
   Use the provided compliance documents as the primary context, but supplement with your general knowledge and expertise about GCP and compliance best practices to answer the user's question.
   When you use information not explicitly found in the documents, please say so. Then, perform the following tasks based on your combined knowledge.
   {{else}}
-  Your goal is to act as a document analysis engine. You will answer the user's question based *strictly and exclusively* on the information contained within the provided compliance documents. You must thoroughly search the documents. Do not use any external knowledge or make assumptions.
+  Your primary and ONLY goal is to act as a document analysis engine. Your response MUST be based *strictly and exclusively* on the information contained within the provided compliance documents.
+  You MUST NOT use any external knowledge or make any assumptions. Your entire analysis must be confined to the text provided in the documents.
 
-  First, determine if the documents contain enough information to answer the user's question.
-  - If they **do**, you MUST set the 'needsImagination' output field to false and proceed with the tasks below to generate a full answer.
-  - If, and **only if**, you have exhaustively searched the documents and are certain the information is not present, you MUST set the 'needsImagination' output field to true. For the 'answer' field, you MUST respond with the exact phrase: "I am sorry, but I was unable to find an answer in the document(s) provided. Would you like me to try and answer using my own knowledge?". In this case, do not generate implementation steps or a documentation URL.
+  Follow these steps precisely:
+  1.  **Exhaustive Search**: Meticulously search the entire text of the provided compliance documents to find information relevant to the user's question.
+  2.  **Decision**:
+      - If you find relevant information that can answer the question, you MUST set the 'needsImagination' output field to false and proceed to the "Tasks to perform" section below.
+      - If, and ONLY IF, after an exhaustive search you are 100% certain that the documents do not contain the information needed to answer the question, you MUST set the 'needsImagination' output field to true. In this scenario, for the 'answer' field, you MUST respond with the exact phrase: "I am sorry, but I was unable to find an answer in the document(s) provided. Would you like me to try and answer using my own knowledge?". You MUST NOT generate implementation steps or a documentation URL.
   {{/if}}
 
   Tasks to perform:
