@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bot, FileText, Send, Loader, Upload, ExternalLink, Info, User, AlertCircle, Wrench, BrainCircuit, Pencil, Save, Trash2 } from 'lucide-react';
+import { Bot, FileText, Send, Loader, Upload, ExternalLink, Info, User, AlertCircle, Wrench, Pencil, Save, Trash2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { CodeBlock } from '@/components/code-block';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -31,8 +31,6 @@ type Message = {
   content: string;
   implementationSteps?: ImplementationStep[];
   googleCloudDocUrl?: string;
-  needsImagination?: boolean;
-  originalQuestion?: string;
 };
 
 export default function CompliancePage() {
@@ -140,7 +138,7 @@ export default function CompliancePage() {
     }
   };
 
-  const askAI = async (questionToAsk: string, useImagination: boolean, existingMessages: Message[]) => {
+  const askAI = async (questionToAsk: string, existingMessages: Message[]) => {
     setIsLoading(true);
     let contextDocs = uploadedDocuments;
     if (selectedContext !== 'all') {
@@ -159,7 +157,6 @@ export default function CompliancePage() {
       const aiResult = await complianceQuestionAnswering({
         complianceDocuments: combinedContent,
         userQuestion: questionToAsk,
-        useImagination
       });
 
       const aiMessage: Message = {
@@ -168,8 +165,6 @@ export default function CompliancePage() {
         content: aiResult.answer,
         implementationSteps: aiResult.implementationSteps,
         googleCloudDocUrl: aiResult.googleCloudDocUrl,
-        needsImagination: aiResult.needsImagination,
-        originalQuestion: aiResult.needsImagination ? questionToAsk : undefined,
       };
       setMessages([...existingMessages, aiMessage]);
       
@@ -193,19 +188,7 @@ export default function CompliancePage() {
     const questionToSubmit = question;
     setQuestion('');
     
-    await askAI(questionToSubmit, false, newMessages);
-  };
-  
-  const handleAskWithImagination = async (message: Message) => {
-    if (!message.originalQuestion) return;
-    const newMessages = [...messages];
-    // Find the message and remove the imagination prompt
-    const messageIndex = newMessages.findIndex(m => m.id === message.id);
-    if(messageIndex > -1) {
-      newMessages[messageIndex] = { ...newMessages[messageIndex], needsImagination: false, content: `Thinking creatively about: "${message.originalQuestion}"` };
-    }
-    setMessages(newMessages);
-    await askAI(message.originalQuestion, true, newMessages);
+    await askAI(questionToSubmit, newMessages);
   };
   
   const handleStartEdit = (message: Message) => {
@@ -232,7 +215,7 @@ export default function CompliancePage() {
     setEditingMessageId(null);
     setEditingText('');
 
-    await askAI(editingText, false, newMessages);
+    await askAI(editingText, newMessages);
   };
 
   const handleImplementClick = (steps: ImplementationStep[]) => {
@@ -327,9 +310,8 @@ export default function CompliancePage() {
                       ) : (
                         <>
                           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          {message.role === 'ai' && (message.googleCloudDocUrl || (message.implementationSteps && message.implementationSteps.length > 0) || message.needsImagination) && (
+                          {message.role === 'ai' && (message.googleCloudDocUrl || (message.implementationSteps && message.implementationSteps.length > 0)) && (
                             <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
-                              {message.needsImagination && <Button variant="secondary" size="sm" onClick={() => handleAskWithImagination(message)}><BrainCircuit className="mr-2 h-4 w-4" /> Use Imagination</Button>}
                               {message.googleCloudDocUrl && <Button asChild variant="outline" size="sm"><a href={message.googleCloudDocUrl} target="_blank" rel="noopener noreferrer"><Info className="mr-2 h-4 w-4" /> Know More</a></Button>}
                               {message.implementationSteps && message.implementationSteps.length > 0 && <Button variant="secondary" size="sm" onClick={() => handleImplementClick(message.implementationSteps!)}><Wrench className="mr-2 h-4 w-4" /> Implement</Button>}
                             </div>
