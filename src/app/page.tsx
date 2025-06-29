@@ -260,11 +260,21 @@ export default function CompliancePage() {
     setIsImaginationLoading(true);
     setImaginationResult(null);
     setImaginationError(null);
+
+    let contextDocs = uploadedDocuments;
+    if (selectedContext !== 'all') {
+      contextDocs = uploadedDocuments.filter(d => d.name === selectedContext);
+    }
+    const combinedContent = contextDocs.map(d => `Document: ${d.name}\n${d.content}`).join('\n\n---\n\n');
+
     try {
         const response = await fetch('/api/imagination', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userQuestion }),
+          body: JSON.stringify({ 
+            userQuestion: userQuestion,
+            complianceDocuments: combinedContent,
+          }),
         });
 
         if (!response.ok) {

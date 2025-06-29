@@ -57,9 +57,18 @@ const imaginationPrompt = ai.definePrompt({
   name: 'imaginationPrompt',
   input: { schema: ImaginationInputSchema },
   output: { schema: ImaginationOutputSchema },
-  prompt: `You are a helpful assistant. Answer the following question based on your general knowledge. Format your answers using Markdown.
+  prompt: `You are a helpful and creative assistant with access to the internet. Your task is to answer the user's question.
 
-Question: {{{userQuestion}}}`,
+You can use your general knowledge and the provided context documents to formulate your response. Format your answers using Markdown.
+
+{{#if complianceDocuments}}
+Analyze the following compliance documents for additional context:
+---
+{{{complianceDocuments}}}
+---
+{{/if}}
+
+Now, answer this user question: "{{userQuestion}}"`,
 });
 
 export const useImaginationFlow = ai.defineFlow(

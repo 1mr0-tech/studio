@@ -55,6 +55,7 @@ export type ComplianceQuestionAnsweringOutput = z.infer<
 
 export const ImaginationInputSchema = z.object({
     userQuestion: z.string().describe('The user question that needs to be answered.'),
+    complianceDocuments: z.string().optional().describe("The content of the user's uploaded documents for context."),
 });
 export type ImaginationInput = z.infer<typeof ImaginationInputSchema>;
 
