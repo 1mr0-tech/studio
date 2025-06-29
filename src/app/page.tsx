@@ -1,26 +1,13 @@
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
-import { complianceQuestionAnswering, type ComplianceQuestionAnsweringOutput, useImagination } from '@/server/actions';
+import { complianceQuestionAnswering, useImagination, type Implementation, type UploadedDoc, type Message } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import { ComplianceSidebar } from '@/components/compliance/sidebar';
 import { ChatInterface } from '@/components/compliance/chat-interface';
-
-// Type definitions
-type Implementation = NonNullable<ComplianceQuestionAnsweringOutput['implementation']>;
-type UploadedDoc = { name: string; content: string; };
-type Message = {
-  id: number;
-  role: 'user' | 'ai';
-  content: string;
-  implementation?: Implementation;
-  googleCloudDocUrl?: string;
-  answerFound?: boolean;
-  userQuestion?: string;
-};
 
 export default function CompliancePage() {
   const { toast } = useToast();

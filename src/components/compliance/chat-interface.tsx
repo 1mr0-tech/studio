@@ -10,23 +10,11 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type { ComplianceQuestionAnsweringOutput } from '@/server/actions';
+import type { Implementation, Message } from '@/app/actions';
 import { AlertCircle, Bot, BrainCircuit, ExternalLink, FileText, Info, Loader, Pencil, Send, User, Wrench } from 'lucide-react';
 
-// Type definitions from page.tsx
-type Implementation = NonNullable<ComplianceQuestionAnsweringOutput['implementation']>;
 type ImplementationStep = NonNullable<Implementation['gcp']>[0];
-type Message = {
-  id: number;
-  role: 'user' | 'ai';
-  content: string;
-  implementation?: Implementation;
-  googleCloudDocUrl?: string;
-  answerFound?: boolean;
-  userQuestion?: string;
-};
 
-// Moved from page.tsx
 function renderImplementationSteps(steps: ImplementationStep[] | undefined) {
   if (!steps || steps.length === 0) {
       return <div className="p-6 text-center text-muted-foreground">No implementation steps provided for this cloud.</div>;
