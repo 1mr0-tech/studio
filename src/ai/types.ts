@@ -13,9 +13,9 @@ export const ImplementationStepSchema = z.object({
 });
 
 export const ImplementationSchema = z.object({
-  gcp: z.array(ImplementationStepSchema).optional().describe("Implementation steps for Google Cloud Platform."),
-  aws: z.array(ImplementationStepSchema).optional().describe("Implementation steps for Amazon Web Services."),
-  azure: z.array(ImplementationStepSchema).optional().describe("Implementation steps for Microsoft Azure."),
+  gcp: z.array(ImplementationStepSchema).optional().describe("Implementation steps or best practices for Google Cloud Platform."),
+  aws: z.array(ImplementationStepSchema).optional().describe("Implementation steps or best practices for Amazon Web Services."),
+  azure: z.array(ImplementationStepSchema).optional().describe("Implementation steps or best practices for Microsoft Azure."),
 });
 export type Implementation = z.infer<typeof ImplementationSchema>;
 
@@ -43,8 +43,8 @@ export const ComplianceQuestionAnsweringOutputSchema = z.object({
     .describe(
       'A relevant Google Cloud documentation URL, if applicable. Only include if highly relevant.'
     ),
-  implementation: ImplementationSchema.optional().describe(
-    'If the question involves implementation, provide step-by-step guidance for GCP, AWS, and Azure. Prioritize GCP.'
+  implementation: ImplementationSchema.describe(
+    'Step-by-step guidance for GCP, AWS, and Azure. If the question is about implementation, provide direct steps. If not, provide general security best practices related to the answer.'
   ),
   suggestsImagination: z.boolean().optional().describe("True if the model suggests using the 'Imagination' feature for a better answer."),
   imaginationSuggestion: z.string().optional().describe("A brief message explaining why Imagination is suggested."),

@@ -169,7 +169,7 @@ export function ChatInterface({
                       {message.role === 'ai' && (
                         <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
                           {message.googleCloudDocUrl && <Button asChild variant="outline" size="sm"><a href={message.googleCloudDocUrl} target="_blank" rel="noopener noreferrer"><Info className="mr-2 h-4 w-4" /> Know More</a></Button>}
-                          {message.implementation && ((message.implementation.gcp?.length || 0) + (message.implementation.aws?.length || 0) + (message.implementation.azure?.length || 0) > 0) && <Button variant="secondary" size="sm" onClick={() => onImplementClick(message.implementation!)}><Wrench className="mr-2 h-4 w-4" /> Implement</Button>}
+                          {message.implementation && <Button variant="secondary" size="sm" onClick={() => onImplementClick(message.implementation!)}><Wrench className="mr-2 h-4 w-4" /> Implement</Button>}
                           {message.answerFound === false && message.userQuestion && <Button variant="secondary" size="sm" onClick={() => onImaginationClick(message.userQuestion!)}><BrainCircuit className="mr-2 h-4 w-4" /> Use Imagination</Button>}
                         </div>
                       )}

@@ -30,13 +30,16 @@ Now, answer this user question: "{{userQuestion}}"
 
 Your response MUST follow these rules, in this order:
 
-1.  **Analyze for Implementation**: First, determine if the user's question asks for or implies a need for technical implementation steps (e.g., "how do I...", "what are the steps for...", "implement X", or questions about technical controls). If it does, you MUST populate the 'implementation' field with detailed, step-by-step guidance for GCP, AWS, and Azure. If you provide implementation steps, also provide a concise summary in the 'answer' field and set 'answerFound' to true.
+1.  **Answer from Documents**: Provide a direct, concise answer to the user's question in the 'answer' field. This answer must be based strictly on the information within the provided documents. Format the answer using Markdown.
 
-2.  **Answer from Documents**: If the question does not involve implementation, provide a direct answer to the user's question in the 'answer' field. This answer must be based strictly on the information within the provided documents. Set 'answerFound' to true.
+2.  **Generate Implementation/Best Practices**: You MUST ALWAYS populate the 'implementation' field for GCP, AWS, and Azure.
+    *   **If the user's question asks for technical implementation steps** (e.g., "how do I...", "what are the steps for...", "implement X", or questions about technical controls), provide a detailed, step-by-step technical guide in the 'implementation' field.
+    *   **If the user's question is NOT about implementation**, provide a list of general security best practices and considerations that are relevant to the topic of your answer in the 'implementation' field.
+    *   In both cases, set 'answerFound' to true.
 
-3.  **Handle Missing Answers**: If you absolutely cannot find the answer in the documents for either of the above cases, you MUST set 'answerFound' to false. Then, set 'suggestsImagination' to true and provide a message in 'imaginationSuggestion' inviting the user to try answering from your general knowledge. The 'answer' field in this case should state that the information was not found.
+3.  **Handle Missing Answers**: If you absolutely cannot find the answer in the documents for the user's question, you MUST set 'answerFound' to false. In this case, the 'answer' field should state that the information was not found. Then, set 'suggestsImagination' to true and provide a message in 'imaginationSuggestion' inviting the user to try answering from your general knowledge. The 'implementation' field should still be populated with general best practices if possible, or left empty if not.
 
-4.  **Formatting and Links**: Format all text answers using Markdown. If you find a relevant official Google Cloud documentation link while answering, include it in the 'googleCloudDocUrl' field.
+4.  **Formatting and Links**: If you find a relevant official Google Cloud documentation link while answering, include it in the 'googleCloudDocUrl' field.
 
 5.  **Schema Adherence**: Structure your entire response according to the output schema.
 `,
