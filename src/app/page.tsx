@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
@@ -67,7 +66,7 @@ function renderImplementationSteps(steps: ImplementationStep[] | undefined) {
           </Accordion>
       </div>
   );
-};
+}
 
 export default function CompliancePage() {
   const { toast } = useToast();
@@ -93,11 +92,10 @@ export default function CompliancePage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Set up the PDF worker. This should only run on the client.
     pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
   }, []);
 
-  function scrollToBottom() {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -105,7 +103,7 @@ export default function CompliancePage() {
     scrollToBottom();
   }, [messages]);
   
-  async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
 
     setIsParsing(true);
@@ -181,18 +179,20 @@ export default function CompliancePage() {
       });
     } finally {
       setIsParsing(false);
-      e.target.value = '';
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
   
-  function handleDeleteDocument(docName: string) {
+  const handleDeleteDocument = (docName: string) => {
     setUploadedDocuments(docs => docs.filter(d => d.name !== docName));
     if (selectedContext === docName) {
       setSelectedContext('all');
     }
   };
 
-  async function askAI(questionToAsk: string, existingMessages: Message[]) {
+  const askAI = async (questionToAsk: string, existingMessages: Message[]) => {
     setIsLoading(true);
     let contextDocs = uploadedDocuments;
     if (selectedContext !== 'all') {
@@ -234,7 +234,7 @@ export default function CompliancePage() {
     }
   };
 
-  async function handleFormSubmit(e: React.FormEvent) {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim() || isLoading) return;
 
@@ -247,17 +247,17 @@ export default function CompliancePage() {
     await askAI(questionToSubmit, newMessages);
   };
   
-  function handleStartEdit(message: Message) {
+  const handleStartEdit = (message: Message) => {
     setEditingMessageId(message.id);
     setEditingText(message.content);
   };
 
-  function handleCancelEdit() {
+  const handleCancelEdit = () => {
     setEditingMessageId(null);
     setEditingText('');
   };
 
-  async function handleSaveEdit() {
+  const handleSaveEdit = async () => {
     if (!editingMessageId || !editingText.trim()) return;
     const messageIndex = messages.findIndex(m => m.id === editingMessageId);
     if (messageIndex === -1) return;
@@ -273,12 +273,12 @@ export default function CompliancePage() {
     await askAI(editingText, newMessages);
   };
 
-  function handleImplementClick(implementation: Implementation) {
+  const handleImplementClick = (implementation: Implementation) => {
     setSelectedImplementation(implementation);
     setIsImplSheetOpen(true);
   };
 
-  async function handleImaginationClick(userQuestion: string) {
+  const handleImaginationClick = async (userQuestion: string) => {
     if (!userQuestion) return;
     setCurrentImaginationQuery(userQuestion);
     setIsImaginationSheetOpen(true);
