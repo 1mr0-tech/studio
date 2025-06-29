@@ -267,6 +267,10 @@ export default function CompliancePage() {
     }
     const combinedContent = contextDocs.map(d => `Document: ${d.name}\n${d.content}`).join('\n\n---\n\n');
 
+    const chatHistory = messages
+      .map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`)
+      .join('\n\n');
+
     try {
         const response = await fetch('/api/imagination', {
           method: 'POST',
@@ -274,6 +278,7 @@ export default function CompliancePage() {
           body: JSON.stringify({ 
             userQuestion: userQuestion,
             complianceDocuments: combinedContent,
+            chatHistory: chatHistory,
           }),
         });
 

@@ -57,12 +57,24 @@ const imaginationPrompt = ai.definePrompt({
   name: 'imaginationPrompt',
   input: { schema: ImaginationInputSchema },
   output: { schema: ImaginationOutputSchema },
-  prompt: `You are a helpful and creative assistant with access to the internet. Your task is to answer the user's question.
+  prompt: `You are a helpful and creative assistant with access to the internet. Your task is to answer the user's question based on the full context provided.
 
-You can use your general knowledge and the provided context documents to formulate your response. Format your answers using Markdown.
+You have access to three sources of information:
+1. Your general knowledge and access to the internet.
+2. The history of the current conversation.
+3. A set of compliance documents provided by the user.
+
+Use all available context to formulate a comprehensive and relevant response. Format your answers using Markdown.
+
+{{#if chatHistory}}
+CONVERSATION HISTORY:
+---
+{{{chatHistory}}}
+---
+{{/if}}
 
 {{#if complianceDocuments}}
-Analyze the following compliance documents for additional context:
+COMPLIANCE DOCUMENTS:
 ---
 {{{complianceDocuments}}}
 ---
