@@ -1,3 +1,10 @@
+/**
+ * @fileOverview This file contains the core Genkit flow definitions for the application.
+ * It is imported by the Genkit development server to register the flows and by the
+ * Next.js server actions to execute the logic. This file should not contain
+ * any Next.js-specific directives like 'use server'.
+ */
+
 import {ai} from '@/lib/genkit';
 import {
     ComplianceQuestionAnsweringInputSchema,
@@ -5,6 +12,8 @@ import {
     ImaginationInputSchema,
     ImaginationOutputSchema,
 } from '@/ai/types';
+
+// --- Genkit Flow Definitions ---
 
 const complianceQuestionAnsweringPrompt = ai.definePrompt({
     name: 'complianceQuestionAnsweringPrompt',

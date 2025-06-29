@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ModeToggle } from '@/components/mode-toggle';
-import type { UploadedDoc } from '@/app/actions';
+import type { UploadedDoc } from '@/ai/types';
 
 interface ComplianceSidebarProps {
   isParsing: boolean;

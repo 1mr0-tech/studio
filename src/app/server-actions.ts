@@ -1,15 +1,12 @@
 'use server';
-import {
-    complianceQuestionAnsweringFlow,
-    useImaginationFlow,
-} from '@/ai/flows';
+import { complianceQuestionAnsweringFlow, useImaginationFlow } from '@/ai/flows';
 import type {
     ComplianceQuestionAnsweringInput,
     ComplianceQuestionAnsweringOutput,
     ImaginationInput,
     ImaginationOutput
 } from '@/ai/types';
-import type { Implementation, UploadedDoc, Message } from '@/ai/types';
+
 
 export async function complianceQuestionAnswering(
     input: ComplianceQuestionAnsweringInput
@@ -20,6 +17,3 @@ export async function complianceQuestionAnswering(
 export async function useImagination(input: ImaginationInput): Promise<ImaginationOutput> {
   return useImaginationFlow(input);
 }
-
-// Re-export types for the UI
-export type { Implementation, UploadedDoc, Message };

@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import type { Implementation, Message } from '@/app/actions';
+import type { Implementation, Message } from '@/ai/types';
 import { AlertCircle, Bot, BrainCircuit, ExternalLink, FileText, Info, Loader, Pencil, Send, User, Wrench } from 'lucide-react';
 
 type ImplementationStep = NonNullable<Implementation['gcp']>[0];
