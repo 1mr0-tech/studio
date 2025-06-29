@@ -37,6 +37,39 @@ type Message = {
   userQuestion?: string;
 };
 
+const renderImplementationSteps = (steps: ImplementationStep[] | undefined) => {
+  if (!steps || steps.length === 0) {
+      return <div className="p-6 text-center text-muted-foreground">No implementation steps provided for this cloud.</div>;
+  }
+  return (
+      <div className="p-1 pt-4">
+          <Accordion type="multiple" className="w-full space-y-2">
+              {steps.map((item, index) => (
+                  <AccordionItem key={index} value={`item-${index}`} className="bg-muted/50 rounded-lg border px-4">
+                      <AccordionTrigger className="text-left hover:no-underline">
+                          <div className="flex-1 pr-4 min-w-0">
+                              <span className="font-semibold">Step {index + 1}:</span> {item.step}
+                          </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pt-2 space-y-4">
+                          {item.bestPractice && (
+                              <div>
+                                  <h4 className="font-semibold text-sm mb-1">Best Practice:</h4>
+                                  <p className="text-sm text-muted-foreground">{item.bestPractice}</p>
+                              </div>
+                          )}
+                          <div>
+                              <h4 className="font-semibold text-sm mb-1">Command:</h4>
+                              <CodeBlock code={item.command} />
+                          </div>
+                      </AccordionContent>
+                  </AccordionItem>
+              ))}
+          </Accordion>
+      </div>
+  );
+};
+
 export default function CompliancePage() {
   const { toast } = useToast();
   const [question, setQuestion] = useState("");
@@ -252,41 +285,6 @@ export default function CompliancePage() {
         setIsImaginationLoading(false);
     }
   };
-
-  const renderImplementationSteps = (steps: ImplementationStep[] | undefined) => {
-    if (!steps || steps.length === 0) {
-        return <div className="p-6 text-center text-muted-foreground">No implementation steps provided for this cloud.</div>;
-    }
-    return (
-        <div className="p-1 pt-4">
-            <Accordion type="multiple" className="w-full space-y-2">
-                {steps.map((item, index) => (
-                    <AccordionItem key={index} value={`item-${index}`} className="bg-muted/50 rounded-lg border px-4">
-                        <AccordionTrigger className="text-left hover:no-underline">
-                            <div className="flex-1 pr-4 min-w-0">
-                                <span className="font-semibold">Step {index + 1}:</span> {item.step}
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="pt-2 space-y-4">
-                            {item.bestPractice && (
-                                <div>
-                                    <h4 className="font-semibold text-sm mb-1">Best Practice:</h4>
-                                    <p className="text-sm text-muted-foreground">{item.bestPractice}</p>
-                                </div>
-                            )}
-                            <div>
-                                <h4 className="font-semibold text-sm mb-1">Command:</h4>
-                                <CodeBlock code={item.command} />
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                ))}
-            </Accordion>
-        </div>
-    );
-  };
-
-  const documentsAvailable = uploadedDocuments.length > 0;
   
   return (
     <div className="flex h-screen bg-muted/40 font-body">
@@ -394,11 +392,11 @@ export default function CompliancePage() {
                 {isLoading && <div className="flex items-start gap-4"><Avatar className="w-8 h-8"><AvatarFallback><Bot className="w-5 h-5"/></AvatarFallback></Avatar><div className="bg-muted rounded-lg p-3 flex items-center"><Loader className="w-5 h-5 animate-spin"/></div></div>}
                 <div ref={messagesEndRef} />
             </div>
-            {!documentsAvailable && messages.length === 0 && <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground"><FileText className="w-16 h-16 mb-4" /><h3 className="text-2xl font-bold font-headline text-foreground">Upload Documents</h3><p className="max-w-md">Start by uploading one or more compliance documents to begin.</p></div>}
+            {uploadedDocuments.length === 0 && messages.length === 0 && <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground"><FileText className="w-16 h-16 mb-4" /><h3 className="text-2xl font-bold font-headline text-foreground">Upload Documents</h3><p className="max-w-md">Start by uploading one or more compliance documents to begin.</p></div>}
             <div className="p-4 border-t bg-background">
                 <form onSubmit={handleFormSubmit} className="flex items-start gap-4">
-                    <Textarea placeholder={documentsAvailable ? "Ask a question about your document(s)..." : "Please upload a document first"} value={question} onChange={(e) => setQuestion(e.target.value)} className="flex-1 resize-none" disabled={!documentsAvailable || isLoading} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleFormSubmit(e); } }}/>
-                    <Button type="submit" disabled={!question.trim() || isLoading || !documentsAvailable}><Send className="w-5 h-5" /><span className="sr-only">Send</span></Button>
+                    <Textarea placeholder={uploadedDocuments.length > 0 ? "Ask a question about your document(s)..." : "Please upload a document first"} value={question} onChange={(e) => setQuestion(e.target.value)} className="flex-1 resize-none" disabled={uploadedDocuments.length === 0 || isLoading} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleFormSubmit(e); } }}/>
+                    <Button type="submit" disabled={!question.trim() || isLoading || uploadedDocuments.length === 0}><Send className="w-5 h-5" /><span className="sr-only">Send</span></Button>
                 </form>
             </div>
         </div>
