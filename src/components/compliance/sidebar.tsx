@@ -91,7 +91,7 @@ export function ComplianceSidebar({
         </Card>
       </div>
       <div className="mt-auto pt-4 text-center text-sm text-muted-foreground">
-        <p>Made with <3 by @imranfosec</p>
+        <p>Made with {'<3'} by @imranfosec</p>
       </div>
     </aside>
   );

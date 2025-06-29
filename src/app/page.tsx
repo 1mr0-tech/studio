@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
-import { complianceQuestionAnswering, useImagination } from '@/app/server-actions';
 import type { Implementation, UploadedDoc, Message } from '@/ai/types';
 import { useToast } from "@/hooks/use-toast";
 import * as pdfjsLib from 'pdfjs-dist';
@@ -151,10 +150,20 @@ export default function CompliancePage() {
     const combinedContent = contextDocs.map(d => `Document: ${d.name}\n${d.content}`).join('\n\n---\n\n');
 
     try {
-      const aiResult = await complianceQuestionAnswering({
-        complianceDocuments: combinedContent,
-        userQuestion: questionToAsk,
+      const response = await fetch('/api/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          complianceDocuments: combinedContent,
+          userQuestion: questionToAsk,
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`);
+      }
+      
+      const aiResult = await response.json();
 
       const aiMessage: Message = {
         id: Date.now(),
@@ -229,7 +238,17 @@ export default function CompliancePage() {
     setImaginationResult(null);
     setImaginationError(null);
     try {
-        const result = await useImagination({ userQuestion });
+        const response = await fetch('/api/imagination', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userQuestion }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.statusText}`);
+        }
+
+        const result = await response.json();
         setImaginationResult(result.answer);
     } catch (error) {
         console.error("Error calling imagination AI:", error);

@@ -1,2 +1,2 @@
-// This file is intentionally left blank to resolve build conflicts.
-// Server actions are defined in src/app/server-actions.ts.
+// This file is intentionally left blank.
+// The application now uses API routes in src/app/api/ instead of Server Actions.
