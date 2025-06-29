@@ -29,15 +29,10 @@ Analyze the following compliance documents:
 Now, answer this user question: "{{userQuestion}}"
 
 IMPORTANT:
-- Base your answer strictly on the information within the provided documents.
-- Format your answers using Markdown, especially for tables, lists, and code blocks.
-- If the documents do not contain the answer, you MUST state that you cannot find the answer in the provided context and set the 'answerFound' field to false. In this case, suggest that the user could try the "Imagination" feature for a general knowledge answer.
-
-- **Implementation Steps vs. Creative Plans:** You must distinguish between two types of requests:
-    1.  **Specific Implementation Steps:** If the user asks a direct "how-to" question (e.g., "how do I enable X?", "steps to configure Y"), you MUST provide concrete, technical steps in the 'implementation' object. Prioritize command-line instructions and include best practices.
-    2.  **Creative Content Generation:** If the user asks for a high-level plan, playbook, or checklist (e.g., "create a security playbook," "design an implementation plan," "make me a checklist for SOC 2"), this requires creative generation. In this case, you MUST set the 'suggestsImagination' field to true and the 'imaginationSuggestion' field to a message like "I can generate that for you using my general knowledge. Would you like me to proceed?". DO NOT populate the 'implementation' object for these creative requests.
-
-- **Populating the 'implementation' object:** When providing specific implementation steps as described above, you must populate the 'implementation' object. You can provide steps for GCP, AWS, and Azure.
+- Base your answer strictly on the information within the provided documents. Format your answers using Markdown.
+- **If the user asks for implementation steps** (e.g., "how do I enable X?"), you MUST provide concrete, technical steps in the 'implementation' object. Provide steps for GCP, AWS, and Azure if possible. If no steps are found, leave the 'implementation' object empty.
+- **If the answer is not in the documents**, you MUST state that you cannot find the answer in the provided context. In this case, you must set the 'answerFound' field to false, set 'suggestsImagination' to true, and set 'imaginationSuggestion' to a message like "The answer isn't in your documents, but I can try to answer from my general knowledge. Would you like to proceed?". Do not provide an answer in the 'answer' field.
+- **If the answer IS in the documents**, provide it in the 'answer' field and set 'answerFound' to true.
 - If you find a relevant official Google Cloud documentation link while answering, include it in the 'googleCloudDocUrl' field.
 - Structure your entire response according to the output schema.
 `,

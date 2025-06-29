@@ -34,9 +34,11 @@ export default function CompliancePage() {
   const [selectedImplementation, setSelectedImplementation] = useState<Implementation | null>(null);
   const [isImplSheetOpen, setIsImplSheetOpen] = useState(false);
   const [isImaginationSheetOpen, setIsImaginationSheetOpen] = useState(false);
-  const [imaginationResult, setImaginationResult] = useState<string | null>(null);
+  
+  const [imaginationMessages, setImaginationMessages] = useState<Message[]>([]);
+  const [imaginationQuestion, setImaginationQuestion] = useState("");
   const [isImaginationLoading, setIsImaginationLoading] = useState(false);
-  const [imaginationError, setImaginationError] = useState<string | null>(null);
+
   const [currentImaginationQuery, setCurrentImaginationQuery] = useState('');
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState('');
@@ -55,7 +57,7 @@ export default function CompliancePage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, imaginationMessages]);
 
   // Handlers
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -254,12 +256,12 @@ export default function CompliancePage() {
   };
 
   const handleImaginationClick = async (userQuestion: string) => {
-    if (!userQuestion) return;
+    if (!userQuestion || isImaginationLoading) return;
+    
     setCurrentImaginationQuery(userQuestion);
     setIsImaginationSheetOpen(true);
     setIsImaginationLoading(true);
-    setImaginationResult(null);
-    setImaginationError(null);
+    setImaginationMessages([]);
 
     let contextDocs = uploadedDocuments;
     if (selectedContext !== 'all') {
@@ -270,6 +272,8 @@ export default function CompliancePage() {
     const chatHistory = messages
       .map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`)
       .join('\n\n');
+    
+    const initialUserMessage: Message = { id: Date.now(), role: 'user', content: userQuestion };
 
     try {
         const response = await fetch('/api/imagination', {
@@ -287,19 +291,67 @@ export default function CompliancePage() {
         }
 
         const result = await response.json();
-        setImaginationResult(result.answer);
+        const initialAiMessage: Message = { id: Date.now() + 1, role: 'ai', content: result.answer };
+        setImaginationMessages([initialUserMessage, initialAiMessage]);
+
     } catch (error) {
         console.error("Error calling imagination AI:", error);
-        setImaginationError("Sorry, I encountered an error while trying to generate a response.");
+        const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: "Sorry, I encountered an error while trying to generate a response." };
+        setImaginationMessages([initialUserMessage, errorMessage]);
         toast({ variant: "destructive", title: "An error occurred", description: "Failed to get a response from the imagination AI." });
     } finally {
         setIsImaginationLoading(false);
     }
   };
 
+  const handleImaginationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!imaginationQuestion.trim() || isImaginationLoading) return;
+
+    const userMessage: Message = { id: Date.now(), role: 'user', content: imaginationQuestion };
+    const newImaginationMessages = [...imaginationMessages, userMessage];
+    setImaginationMessages(newImaginationMessages);
+    
+    const questionToSubmit = imaginationQuestion;
+    setImaginationQuestion('');
+    setIsImaginationLoading(true);
+
+    const contextDocs = uploadedDocuments.filter(d => selectedContext === 'all' || d.name === selectedContext);
+    const combinedContent = contextDocs.map(d => `Document: ${d.name}\n${d.content}`).join('\n\n---\n\n');
+    
+    const imaginationHistory = newImaginationMessages
+      .map(m => `${m.role === 'user' ? 'User' : 'AI'}: ${m.content}`)
+      .join('\n\n');
+
+    try {
+        const response = await fetch('/api/imagination', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            userQuestion: questionToSubmit,
+            complianceDocuments: combinedContent,
+            chatHistory: imaginationHistory, 
+          }),
+        });
+        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+        const result = await response.json();
+        const aiMessage: Message = { id: Date.now() + 1, role: 'ai', content: result.answer };
+        setImaginationMessages(messages => [...messages, aiMessage]);
+    } catch (error) {
+        console.error("Error calling imagination AI:", error);
+        const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: "Sorry, I encountered an error." };
+        setImaginationMessages(messages => [...messages, errorMessage]);
+        toast({ variant: "destructive", title: "An error occurred", description: "Failed to get a response from the imagination AI." });
+    } finally {
+        setIsImaginationLoading(false);
+    }
+  }
+
+
   const handleGlobalImaginationClick = () => {
     if (!question.trim() || isLoading) return;
     handleImaginationClick(question);
+    setQuestion('');
   };
 
   return (
@@ -323,10 +375,10 @@ export default function CompliancePage() {
           isImplSheetOpen={isImplSheetOpen}
           selectedImplementation={selectedImplementation}
           isImaginationSheetOpen={isImaginationSheetOpen}
-          imaginationResult={imaginationResult}
+          imaginationMessages={imaginationMessages}
           isImaginationLoading={isImaginationLoading}
-          imaginationError={imaginationError}
           currentImaginationQuery={currentImaginationQuery}
+          imaginationQuestion={imaginationQuestion}
           messagesEndRef={messagesEndRef}
           onQuestionChange={setQuestion}
           onFormSubmit={handleFormSubmit}
@@ -339,6 +391,8 @@ export default function CompliancePage() {
           onGlobalImaginationClick={handleGlobalImaginationClick}
           onImplSheetOpenChange={setIsImplSheetOpen}
           onImaginationSheetOpenChange={setIsImaginationSheetOpen}
+          onImaginationQuestionChange={setImaginationQuestion}
+          onImaginationSubmit={handleImaginationSubmit}
         />
       </div>
       <AlertDialog open={suggestionDialog.open} onOpenChange={(open) => setSuggestionDialog(prev => ({...prev, open}))}>

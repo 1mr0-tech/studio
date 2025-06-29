@@ -61,11 +61,6 @@ interface ChatInterfaceProps {
   editingText: string;
   isImplSheetOpen: boolean;
   selectedImplementation: Implementation | null;
-  isImaginationSheetOpen: boolean;
-  imaginationResult: string | null;
-  isImaginationLoading: boolean;
-  imaginationError: string | null;
-  currentImaginationQuery: string;
   messagesEndRef: RefObject<HTMLDivElement>;
   onQuestionChange: (value: string) => void;
   onFormSubmit: (e: React.FormEvent) => void;
@@ -77,6 +72,14 @@ interface ChatInterfaceProps {
   onImaginationClick: (userQuestion: string) => void;
   onGlobalImaginationClick: () => void;
   onImplSheetOpenChange: (open: boolean) => void;
+  // Imagination Props
+  isImaginationSheetOpen: boolean;
+  imaginationMessages: Message[];
+  isImaginationLoading: boolean;
+  currentImaginationQuery: string;
+  imaginationQuestion: string;
+  onImaginationQuestionChange: (value: string) => void;
+  onImaginationSubmit: (e: React.FormEvent) => void;
   onImaginationSheetOpenChange: (open: boolean) => void;
 }
 
@@ -89,11 +92,6 @@ export function ChatInterface({
   editingText,
   isImplSheetOpen,
   selectedImplementation,
-  isImaginationSheetOpen,
-  imaginationResult,
-  isImaginationLoading,
-  imaginationError,
-  currentImaginationQuery,
   messagesEndRef,
   onQuestionChange,
   onFormSubmit,
@@ -105,8 +103,36 @@ export function ChatInterface({
   onImaginationClick,
   onGlobalImaginationClick,
   onImplSheetOpenChange,
+  // Imagination Props
+  isImaginationSheetOpen,
+  imaginationMessages,
+  isImaginationLoading,
+  currentImaginationQuery,
+  imaginationQuestion,
+  onImaginationQuestionChange,
+  onImaginationSubmit,
   onImaginationSheetOpenChange,
 }: ChatInterfaceProps) {
+  const markdownComponents = {
+    p: ({node, ...props}: any) => <p className="whitespace-pre-wrap break-words mb-2 last:mb-0" {...props} />,
+    table: ({node, ...props}: any) => <table className="w-full my-2 border-collapse" {...props} />,
+    thead: ({node, ...props}: any) => <thead className="bg-muted/50" {...props} />,
+    tr: ({node, ...props}: any) => <tr className="border-b last:border-b-0" {...props} />,
+    th: ({node, ...props}: any) => <th className="border p-2 text-left font-semibold" {...props} />,
+    td: ({node, ...props}: any) => <td className="border p-2" {...props} />,
+    ul: ({node, ...props}: any) => <ul className="list-disc list-inside my-2" {...props} />,
+    ol: ({node, ...props}: any) => <ol className="list-decimal list-inside my-2" {...props} />,
+    code: ({node, inline, className, children, ...props}: any) => {
+      return !inline ? (
+        <CodeBlock code={String(children).replace(/\n$/, '')} />
+      ) : (
+        <code className="bg-muted px-1 py-0.5 rounded-md font-code text-sm" {...props}>
+          {children}
+        </code>
+      );
+    }
+  };
+  
   return (
     <>
       <main className="flex-1 flex flex-col h-screen">
@@ -131,25 +157,7 @@ export function ChatInterface({
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
                               className="text-sm"
-                              components={{
-                                p: ({node, ...props}) => <p className="whitespace-pre-wrap break-words mb-2 last:mb-0" {...props} />,
-                                table: ({node, ...props}) => <table className="w-full my-2 border-collapse" {...props} />,
-                                thead: ({node, ...props}) => <thead className="bg-muted/50" {...props} />,
-                                tr: ({node, ...props}) => <tr className="border-b last:border-b-0" {...props} />,
-                                th: ({node, ...props}) => <th className="border p-2 text-left font-semibold" {...props} />,
-                                td: ({node, ...props}) => <td className="border p-2" {...props} />,
-                                ul: ({node, ...props}) => <ul className="list-disc list-inside my-2" {...props} />,
-                                ol: ({node, ...props}) => <ol className="list-decimal list-inside my-2" {...props} />,
-                                code: ({node, inline, className, children, ...props}) => {
-                                  return !inline ? (
-                                    <CodeBlock code={String(children).replace(/\n$/, '')} />
-                                  ) : (
-                                    <code className="bg-muted px-1 py-0.5 rounded-md font-code text-sm" {...props}>
-                                      {children}
-                                    </code>
-                                  );
-                                }
-                              }}
+                              components={markdownComponents}
                             >
                               {message.content}
                             </ReactMarkdown>
@@ -241,50 +249,51 @@ export function ChatInterface({
       </Sheet>
 
       <Sheet open={isImaginationSheetOpen} onOpenChange={onImaginationSheetOpenChange}>
-        <SheetContent className="w-[50vw] sm:max-w-2xl">
-          <SheetHeader>
+        <SheetContent className="w-[50vw] sm:max-w-2xl flex flex-col p-0">
+          <SheetHeader className="p-4 border-b">
             <SheetTitle className="font-headline text-2xl flex items-center gap-2"><BrainCircuit /> Imagination Mode</SheetTitle>
-            <SheetDescription>Answering your question using general AI knowledge, not your documents.</SheetDescription>
+            <SheetDescription>Answering "{currentImaginationQuery}" using general AI knowledge.</SheetDescription>
           </SheetHeader>
-          <div className="p-4 space-y-4 overflow-y-auto h-[calc(100%-80px)]">
-            <div>
-              <h4 className="font-semibold mb-2 text-sm">Your Question:</h4>
-              <p className="text-muted-foreground p-3 border rounded-md text-sm">{currentImaginationQuery}</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2 text-sm">AI Answer:</h4>
-              <div className="p-3 border rounded-md min-h-[100px] overflow-x-auto">
-                {isImaginationLoading && <div className="flex items-center gap-2 text-muted-foreground"><Loader className="w-5 h-5 animate-spin" />Generating...</div>}
-                {imaginationError && <p className="text-destructive text-sm">{imaginationError}</p>}
-                {imaginationResult && (
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    className="text-sm"
-                    components={{
-                      p: ({node, ...props}) => <p className="whitespace-pre-wrap break-words mb-2 last:mb-0" {...props} />,
-                      table: ({node, ...props}) => <table className="w-full my-2 border-collapse" {...props} />,
-                      thead: ({node, ...props}) => <thead className="bg-muted/50" {...props} />,
-                      tr: ({node, ...props}) => <tr className="border-b last:border-b-0" {...props} />,
-                      th: ({node, ...props}) => <th className="border p-2 text-left font-semibold" {...props} />,
-                      td: ({node, ...props}) => <td className="border p-2" {...props} />,
-                      ul: ({node, ...props}) => <ul className="list-disc list-inside my-2" {...props} />,
-                      ol: ({node, ...props}) => <ol className="list-decimal list-inside my-2" {...props} />,
-                      code: ({node, inline, className, children, ...props}) => {
-                        return !inline ? (
-                          <CodeBlock code={String(children).replace(/\n$/, '')} />
-                        ) : (
-                          <code className="bg-muted px-1 py-0.5 rounded-md font-code text-sm" {...props}>
-                            {children}
-                          </code>
-                        );
-                      }
-                    }}
-                  >
-                    {imaginationResult}
-                  </ReactMarkdown>
-                )}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {imaginationMessages.map((message) => (
+              <div key={message.id} className={cn("flex items-start gap-4", message.role === 'user' ? "justify-end" : "")}>
+                {message.role === 'ai' && <Avatar className="w-8 h-8"><AvatarFallback><Bot className="w-5 h-5" /></AvatarFallback></Avatar>}
+                <div className={cn("max-w-[85%] rounded-lg p-3", message.role === 'user' ? "bg-primary text-primary-foreground" : "bg-card border")}>
+                  <div className="overflow-x-auto">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      className="text-sm"
+                      components={markdownComponents}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+                {message.role === 'user' && <Avatar className="w-8 h-8"><AvatarFallback><User className="w-5 h-5" /></AvatarFallback></Avatar>}
               </div>
-            </div>
+            ))}
+            {isImaginationLoading && (
+              <div className="flex items-start gap-4">
+                <Avatar className="w-8 h-8"><AvatarFallback><Bot className="w-5 h-5" /></AvatarFallback></Avatar>
+                <div className="bg-muted rounded-lg p-3 flex items-center">
+                  <Loader className="w-5 h-5 animate-spin" />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="p-4 border-t bg-background">
+            <form onSubmit={onImaginationSubmit} className="flex items-start gap-4">
+              <Textarea 
+                placeholder="Ask a follow-up question..." 
+                value={imaginationQuestion} 
+                onChange={(e) => onImaginationQuestionChange(e.target.value)} 
+                className="flex-1 resize-none" 
+                disabled={isImaginationLoading} 
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onImaginationSubmit(e); } }} 
+              />
+              <Button type="submit" disabled={!imaginationQuestion.trim() || isImaginationLoading}><Send className="w-5 h-5" /><span className="sr-only">Send</span></Button>
+            </form>
           </div>
         </SheetContent>
       </Sheet>
