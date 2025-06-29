@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { RefObject } from 'react';
+import { useState, useEffect, type RefObject } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -17,6 +17,12 @@ import type { Implementation, Message } from '@/ai/types';
 import { AlertCircle, Bot, BrainCircuit, ExternalLink, FileText, Info, Loader, Pencil, Send, User, Wrench } from 'lucide-react';
 
 type ImplementationStep = NonNullable<Implementation['gcp']>[0];
+
+const consoleUrls: Record<string, { name: string; url: string }> = {
+  gcp: { name: 'GCP', url: 'https://console.cloud.google.com/' },
+  aws: { name: 'AWS', url: 'https://console.aws.amazon.com/' },
+  azure: { name: 'Azure', url: 'https://portal.azure.com/' },
+};
 
 function renderImplementationSteps(steps: ImplementationStep[] | undefined) {
   if (!steps || steps.length === 0) {
@@ -113,6 +119,18 @@ export function ChatInterface({
   onImaginationSubmit,
   onImaginationSheetOpenChange,
 }: ChatInterfaceProps) {
+  const [activeCloudTab, setActiveCloudTab] = useState('gcp');
+
+  useEffect(() => {
+    if (isImplSheetOpen && selectedImplementation) {
+      const defaultTab = 
+        selectedImplementation.gcp?.length ? 'gcp' :
+        selectedImplementation.aws?.length ? 'aws' :
+        selectedImplementation.azure?.length ? 'azure' : 'gcp';
+      setActiveCloudTab(defaultTab);
+    }
+  }, [isImplSheetOpen, selectedImplementation]);
+
   const markdownComponents = {
     p: ({node, ...props}: any) => <p className="whitespace-pre-wrap break-words mb-2 last:mb-0" {...props} />,
     table: ({node, ...props}: any) => <table className="w-full my-2 border-collapse" {...props} />,
@@ -217,7 +235,7 @@ export function ChatInterface({
               {selectedImplementation ? (
                 <Card className="border-0 shadow-none">
                   <CardContent className="p-4">
-                    <Tabs defaultValue="gcp" className="w-full">
+                    <Tabs value={activeCloudTab} onValueChange={setActiveCloudTab} className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="gcp" disabled={!selectedImplementation.gcp || selectedImplementation.gcp.length === 0}>GCP</TabsTrigger>
                         <TabsTrigger value="aws" disabled={!selectedImplementation.aws || selectedImplementation.aws.length === 0}>AWS</TabsTrigger>
@@ -239,8 +257,8 @@ export function ChatInterface({
             </div>
             <div className="p-4 border-t mt-auto">
               <Button asChild className="w-full">
-                <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">
-                  Open Cloud Console<ExternalLink className="ml-2 h-4 w-4" />
+                <a href={consoleUrls[activeCloudTab]?.url} target="_blank" rel="noopener noreferrer">
+                  Open {consoleUrls[activeCloudTab]?.name} Console<ExternalLink className="ml-2 h-4 w-4" />
                 </a>
               </Button>
             </div>
