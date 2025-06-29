@@ -1,4 +1,5 @@
+
 import { config } from 'dotenv';
 config();
 
-import '@/app/actions';
+import '@/ai/flows';
