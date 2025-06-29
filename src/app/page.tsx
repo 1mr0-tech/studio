@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
@@ -8,6 +9,17 @@ import mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import { ComplianceSidebar } from '@/components/compliance/sidebar';
 import { ChatInterface } from '@/components/compliance/chat-interface';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { BrainCircuit } from 'lucide-react';
 
 export default function CompliancePage() {
   const { toast } = useToast();
@@ -28,6 +40,7 @@ export default function CompliancePage() {
   const [currentImaginationQuery, setCurrentImaginationQuery] = useState('');
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState('');
+  const [suggestionDialog, setSuggestionDialog] = useState<{open: boolean; question: string; suggestion: string}>({ open: false, question: '', suggestion: '' });
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -173,8 +186,18 @@ export default function CompliancePage() {
         googleCloudDocUrl: aiResult.googleCloudDocUrl,
         answerFound: aiResult.answerFound,
         userQuestion: questionToAsk,
+        suggestsImagination: aiResult.suggestsImagination,
+        imaginationSuggestion: aiResult.imaginationSuggestion,
       };
       setMessages([...existingMessages, aiMessage]);
+
+      if (aiResult.suggestsImagination && aiResult.imaginationSuggestion) {
+        setSuggestionDialog({
+          open: true,
+          question: questionToAsk,
+          suggestion: aiResult.imaginationSuggestion,
+        });
+      }
       
     } catch (error) {
       console.error("Error calling AI:", error);
@@ -265,42 +288,64 @@ export default function CompliancePage() {
   };
 
   return (
-    <div className="flex h-screen bg-muted/40 font-body">
-      <ComplianceSidebar
-        isParsing={isParsing}
-        uploadedDocuments={uploadedDocuments}
-        selectedContext={selectedContext}
-        handleFileChange={handleFileChange}
-        handleDeleteDocument={handleDeleteDocument}
-        onContextChange={setSelectedContext}
-      />
-      <ChatInterface
-        messages={messages}
-        isLoading={isLoading}
-        question={question}
-        documentsAvailable={uploadedDocuments.length > 0}
-        editingMessageId={editingMessageId}
-        editingText={editingText}
-        isImplSheetOpen={isImplSheetOpen}
-        selectedImplementation={selectedImplementation}
-        isImaginationSheetOpen={isImaginationSheetOpen}
-        imaginationResult={imaginationResult}
-        isImaginationLoading={isImaginationLoading}
-        imaginationError={imaginationError}
-        currentImaginationQuery={currentImaginationQuery}
-        messagesEndRef={messagesEndRef}
-        onQuestionChange={setQuestion}
-        onFormSubmit={handleFormSubmit}
-        onStartEdit={handleStartEdit}
-        onCancelEdit={handleCancelEdit}
-        onSaveEdit={handleSaveEdit}
-        onSetEditingText={setEditingText}
-        onImplementClick={handleImplementClick}
-        onImaginationClick={handleImaginationClick}
-        onGlobalImaginationClick={handleGlobalImaginationClick}
-        onImplSheetOpenChange={setIsImplSheetOpen}
-        onImaginationSheetOpenChange={setIsImaginationSheetOpen}
-      />
-    </div>
+    <>
+      <div className="flex h-screen bg-muted/40 font-body">
+        <ComplianceSidebar
+          isParsing={isParsing}
+          uploadedDocuments={uploadedDocuments}
+          selectedContext={selectedContext}
+          handleFileChange={handleFileChange}
+          handleDeleteDocument={handleDeleteDocument}
+          onContextChange={setSelectedContext}
+        />
+        <ChatInterface
+          messages={messages}
+          isLoading={isLoading}
+          question={question}
+          documentsAvailable={uploadedDocuments.length > 0}
+          editingMessageId={editingMessageId}
+          editingText={editingText}
+          isImplSheetOpen={isImplSheetOpen}
+          selectedImplementation={selectedImplementation}
+          isImaginationSheetOpen={isImaginationSheetOpen}
+          imaginationResult={imaginationResult}
+          isImaginationLoading={isImaginationLoading}
+          imaginationError={imaginationError}
+          currentImaginationQuery={currentImaginationQuery}
+          messagesEndRef={messagesEndRef}
+          onQuestionChange={setQuestion}
+          onFormSubmit={handleFormSubmit}
+          onStartEdit={handleStartEdit}
+          onCancelEdit={handleCancelEdit}
+          onSaveEdit={handleSaveEdit}
+          onSetEditingText={setEditingText}
+          onImplementClick={handleImplementClick}
+          onImaginationClick={handleImaginationClick}
+          onGlobalImaginationClick={handleGlobalImaginationClick}
+          onImplSheetOpenChange={setIsImplSheetOpen}
+          onImaginationSheetOpenChange={setIsImaginationSheetOpen}
+        />
+      </div>
+      <AlertDialog open={suggestionDialog.open} onOpenChange={(open) => setSuggestionDialog(prev => ({...prev, open}))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <BrainCircuit className="w-5 h-5" /> Enhance with Imagination?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {suggestionDialog.suggestion}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              handleImaginationClick(suggestionDialog.question);
+            }}>
+              Let's do it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

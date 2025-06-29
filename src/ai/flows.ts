@@ -30,11 +30,13 @@ Now, answer this user question: "{{userQuestion}}"
 
 IMPORTANT:
 - Base your answer strictly on the information within the provided documents.
+- Format your answers using Markdown, especially for tables, lists, and code blocks.
 - If the documents do not contain the answer, you MUST state that you cannot find the answer in the provided context and set the 'answerFound' field to false. In this case, suggest that the user could try the "Imagination" feature for a general knowledge answer.
 - If the question can be interpreted as a request for implementation steps (e.g., "how do I..."), you MUST provide practical, command-line based steps for GCP.
 - When providing implementation steps, ensure the 'implementation' object is populated and not empty. You can also provide steps for AWS and Azure if relevant.
 - For each implementation step, also include relevant best practices.
 - If you find a relevant official Google Cloud documentation link, include it in the 'googleCloudDocUrl' field.
+- If the user's question asks for creative content generation (like creating a checklist, a playbook, an implementation plan, etc.) that goes beyond the information present in the documents, set the 'suggestsImagination' field to true. Also, provide a short, encouraging message in the 'imaginationSuggestion' field, like 'I can generate a more detailed response for you using my general knowledge.'
 - Structure your entire response according to the output schema.
 `,
 });
@@ -55,7 +57,7 @@ const imaginationPrompt = ai.definePrompt({
   name: 'imaginationPrompt',
   input: { schema: ImaginationInputSchema },
   output: { schema: ImaginationOutputSchema },
-  prompt: `You are a helpful assistant. Answer the following question based on your general knowledge.
+  prompt: `You are a helpful assistant. Answer the following question based on your general knowledge. Format your answers using Markdown.
 
 Question: {{{userQuestion}}}`,
 });

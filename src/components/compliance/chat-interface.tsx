@@ -1,6 +1,9 @@
+
 'use client';
 
 import type { RefObject } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -123,7 +126,38 @@ export function ChatInterface({
                     </div>
                   ) : (
                     <>
-                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                      <div className="overflow-x-auto">
+                        {message.role === 'ai' ? (
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              className="text-sm"
+                              components={{
+                                p: ({node, ...props}) => <p className="whitespace-pre-wrap break-words mb-2 last:mb-0" {...props} />,
+                                table: ({node, ...props}) => <table className="w-full my-2 border-collapse" {...props} />,
+                                thead: ({node, ...props}) => <thead className="bg-muted/50" {...props} />,
+                                tr: ({node, ...props}) => <tr className="border-b last:border-b-0" {...props} />,
+                                th: ({node, ...props}) => <th className="border p-2 text-left font-semibold" {...props} />,
+                                td: ({node, ...props}) => <td className="border p-2" {...props} />,
+                                ul: ({node, ...props}) => <ul className="list-disc list-inside my-2" {...props} />,
+                                ol: ({node, ...props}) => <ol className="list-decimal list-inside my-2" {...props} />,
+                                code: ({node, inline, className, children, ...props}) => {
+                                  return !inline ? (
+                                    <CodeBlock code={String(children).replace(/\n$/, '')} />
+                                  ) : (
+                                    <code className="bg-muted px-1 py-0.5 rounded-md font-code text-sm" {...props}>
+                                      {children}
+                                    </code>
+                                  );
+                                }
+                              }}
+                            >
+                              {message.content}
+                            </ReactMarkdown>
+                          ) : (
+                            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                          )}
+                      </div>
+
                       {message.role === 'ai' && (
                         <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
                           {message.googleCloudDocUrl && <Button asChild variant="outline" size="sm"><a href={message.googleCloudDocUrl} target="_blank" rel="noopener noreferrer"><Info className="mr-2 h-4 w-4" /> Know More</a></Button>}
@@ -222,7 +256,11 @@ export function ChatInterface({
               <div className="p-3 border rounded-md min-h-[100px]">
                 {isImaginationLoading && <div className="flex items-center gap-2 text-muted-foreground"><Loader className="w-5 h-5 animate-spin" />Generating...</div>}
                 {imaginationError && <p className="text-destructive text-sm">{imaginationError}</p>}
-                {imaginationResult && <p className="whitespace-pre-wrap text-sm">{imaginationResult}</p>}
+                {imaginationResult && (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]} className="text-sm">
+                    {imaginationResult}
+                  </ReactMarkdown>
+                )}
               </div>
             </div>
           </div>

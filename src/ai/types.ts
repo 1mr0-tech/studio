@@ -46,6 +46,8 @@ export const ComplianceQuestionAnsweringOutputSchema = z.object({
   implementation: ImplementationSchema.optional().describe(
     'If the question involves implementation, provide step-by-step guidance for GCP, AWS, and Azure. Prioritize GCP.'
   ),
+  suggestsImagination: z.boolean().optional().describe("True if the model suggests using the 'Imagination' feature for a better answer."),
+  imaginationSuggestion: z.string().optional().describe("A brief message explaining why Imagination is suggested."),
 });
 export type ComplianceQuestionAnsweringOutput = z.infer<
   typeof ComplianceQuestionAnsweringOutputSchema
@@ -71,4 +73,6 @@ export type Message = {
   googleCloudDocUrl?: string;
   answerFound?: boolean;
   userQuestion?: string;
+  suggestsImagination?: boolean;
+  imaginationSuggestion?: string;
 };

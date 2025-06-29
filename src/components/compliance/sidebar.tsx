@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ChangeEvent } from 'react';
@@ -66,13 +67,13 @@ export function ComplianceSidebar({
                     {uploadedDocuments.map(doc => <SelectItem key={doc.name} value={doc.name}>{doc.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <ScrollArea className="max-h-32">
+                <ScrollArea className="h-40">
                   <div className="space-y-2 pt-2 pr-4">
                     {uploadedDocuments.map(doc => (
                       <div key={doc.name} className="rounded-md border p-2 flex items-center gap-2 text-sm">
-                        <FileText className="w-5 h-5 text-primary" />
-                        <p className="font-medium truncate flex-1">{doc.name}</p>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
+                        <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                        <p className="font-medium flex-1 min-w-0 break-words">{doc.name}</p>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
                       </div>
                     ))}
                   </div>
