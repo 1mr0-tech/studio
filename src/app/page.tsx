@@ -22,8 +22,6 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ModeToggle } from '@/components/mode-toggle';
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-
 type Implementation = NonNullable<ComplianceQuestionAnsweringOutput['implementation']>;
 type ImplementationStep = NonNullable<Implementation['gcp']>[0];
 type UploadedDoc = { name: string; content: string; };
@@ -38,7 +36,7 @@ type Message = {
   userQuestion?: string;
 };
 
-const renderImplementationSteps = (steps: ImplementationStep[] | undefined) => {
+function renderImplementationSteps(steps: ImplementationStep[] | undefined) {
   if (!steps || steps.length === 0) {
       return <div className="p-6 text-center text-muted-foreground">No implementation steps provided for this cloud.</div>;
   }
@@ -94,7 +92,12 @@ export default function CompliancePage() {
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const scrollToBottom = () => {
+  useEffect(() => {
+    // Set up the PDF worker. This should only run on the client.
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+  }, []);
+
+  function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -102,7 +105,7 @@ export default function CompliancePage() {
     scrollToBottom();
   }, [messages]);
   
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
 
     setIsParsing(true);
@@ -182,14 +185,14 @@ export default function CompliancePage() {
     }
   };
   
-  const handleDeleteDocument = (docName: string) => {
+  function handleDeleteDocument(docName: string) {
     setUploadedDocuments(docs => docs.filter(d => d.name !== docName));
     if (selectedContext === docName) {
       setSelectedContext('all');
     }
   };
 
-  const askAI = async (questionToAsk: string, existingMessages: Message[]) => {
+  async function askAI(questionToAsk: string, existingMessages: Message[]) {
     setIsLoading(true);
     let contextDocs = uploadedDocuments;
     if (selectedContext !== 'all') {
@@ -231,7 +234,7 @@ export default function CompliancePage() {
     }
   };
 
-  const handleFormSubmit = async (e: React.FormEvent) => {
+  async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!question.trim() || isLoading) return;
 
@@ -244,17 +247,17 @@ export default function CompliancePage() {
     await askAI(questionToSubmit, newMessages);
   };
   
-  const handleStartEdit = (message: Message) => {
+  function handleStartEdit(message: Message) {
     setEditingMessageId(message.id);
     setEditingText(message.content);
   };
 
-  const handleCancelEdit = () => {
+  function handleCancelEdit() {
     setEditingMessageId(null);
     setEditingText('');
   };
 
-  const handleSaveEdit = async () => {
+  async function handleSaveEdit() {
     if (!editingMessageId || !editingText.trim()) return;
     const messageIndex = messages.findIndex(m => m.id === editingMessageId);
     if (messageIndex === -1) return;
@@ -270,12 +273,12 @@ export default function CompliancePage() {
     await askAI(editingText, newMessages);
   };
 
-  const handleImplementClick = (implementation: Implementation) => {
+  function handleImplementClick(implementation: Implementation) {
     setSelectedImplementation(implementation);
     setIsImplSheetOpen(true);
   };
 
-  const handleImaginationClick = async (userQuestion: string) => {
+  async function handleImaginationClick(userQuestion: string) {
     if (!userQuestion) return;
     setCurrentImaginationQuery(userQuestion);
     setIsImaginationSheetOpen(true);
