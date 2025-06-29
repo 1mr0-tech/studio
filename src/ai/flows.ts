@@ -30,10 +30,11 @@ Now, answer this user question: "{{userQuestion}}"
 
 IMPORTANT:
 - Base your answer strictly on the information within the provided documents.
-- If the documents do not contain the answer, you MUST state that you cannot find the answer in the provided context and set answerFound to false. In this case, suggest that the user could try the "Imagination" feature for a general knowledge answer.
-- If the question asks for implementation steps (e.g., "how do I..."), provide practical, command-line based steps for GCP, and optionally for AWS and Azure if relevant.
-- If you provide implementation steps, also include relevant best practices for each step.
-- If you can find a relevant official Google Cloud documentation link, include it in the 'googleCloudDocUrl' field.
+- If the documents do not contain the answer, you MUST state that you cannot find the answer in the provided context and set the 'answerFound' field to false. In this case, suggest that the user could try the "Imagination" feature for a general knowledge answer.
+- If the question can be interpreted as a request for implementation steps (e.g., "how do I..."), you MUST provide practical, command-line based steps for GCP.
+- When providing implementation steps, ensure the 'implementation' object is populated and not empty. You can also provide steps for AWS and Azure if relevant.
+- For each implementation step, also include relevant best practices.
+- If you find a relevant official Google Cloud documentation link, include it in the 'googleCloudDocUrl' field.
 - Structure your entire response according to the output schema.
 `,
 });

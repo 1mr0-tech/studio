@@ -72,6 +72,7 @@ interface ChatInterfaceProps {
   onSetEditingText: (value: string) => void;
   onImplementClick: (implementation: Implementation) => void;
   onImaginationClick: (userQuestion: string) => void;
+  onGlobalImaginationClick: () => void;
   onImplSheetOpenChange: (open: boolean) => void;
   onImaginationSheetOpenChange: (open: boolean) => void;
 }
@@ -99,6 +100,7 @@ export function ChatInterface({
   onSetEditingText,
   onImplementClick,
   onImaginationClick,
+  onGlobalImaginationClick,
   onImplSheetOpenChange,
   onImaginationSheetOpenChange,
 }: ChatInterfaceProps) {
@@ -121,11 +123,11 @@ export function ChatInterface({
                     </div>
                   ) : (
                     <>
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                       {message.role === 'ai' && (
                         <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
                           {message.googleCloudDocUrl && <Button asChild variant="outline" size="sm"><a href={message.googleCloudDocUrl} target="_blank" rel="noopener noreferrer"><Info className="mr-2 h-4 w-4" /> Know More</a></Button>}
-                          {message.implementation && <Button variant="secondary" size="sm" onClick={() => onImplementClick(message.implementation!)}><Wrench className="mr-2 h-4 w-4" /> Implement</Button>}
+                          {message.implementation && ((message.implementation.gcp?.length || 0) + (message.implementation.aws?.length || 0) + (message.implementation.azure?.length || 0) > 0) && <Button variant="secondary" size="sm" onClick={() => onImplementClick(message.implementation!)}><Wrench className="mr-2 h-4 w-4" /> Implement</Button>}
                           {message.answerFound === false && message.userQuestion && <Button variant="secondary" size="sm" onClick={() => onImaginationClick(message.userQuestion!)}><BrainCircuit className="mr-2 h-4 w-4" /> Use Imagination</Button>}
                         </div>
                       )}
@@ -147,6 +149,17 @@ export function ChatInterface({
               <Textarea placeholder={documentsAvailable ? "Ask a question about your document(s)..." : "Please upload a document first"} value={question} onChange={(e) => onQuestionChange(e.target.value)} className="flex-1 resize-none" disabled={!documentsAvailable || isLoading} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onFormSubmit(e); } }} />
               <Button type="submit" disabled={!question.trim() || isLoading || !documentsAvailable}><Send className="w-5 h-5" /><span className="sr-only">Send</span></Button>
             </form>
+            <div className="flex items-center justify-center pt-2">
+              <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onGlobalImaginationClick}
+                  disabled={!question.trim() || isLoading}
+              >
+                  <BrainCircuit className="mr-2 h-4 w-4" />
+                  Or, ask with Imagination
+              </Button>
+            </div>
           </div>
         </div>
       </main>

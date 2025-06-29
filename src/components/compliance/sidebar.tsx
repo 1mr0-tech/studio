@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ModeToggle } from '@/components/mode-toggle';
 import type { UploadedDoc } from '@/ai/types';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface ComplianceSidebarProps {
   isParsing: boolean;
@@ -29,7 +30,7 @@ export function ComplianceSidebar({
 }: ComplianceSidebarProps) {
   return (
     <aside className="w-[400px] flex-shrink-0 bg-background p-4 flex flex-col gap-6 border-r">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 overflow-y-auto pr-2 -mr-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Bot className="w-8 h-8 text-primary" />
@@ -65,33 +66,39 @@ export function ComplianceSidebar({
                     {uploadedDocuments.map(doc => <SelectItem key={doc.name} value={doc.name}>{doc.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                <div className="space-y-2 pt-2">
-                  {uploadedDocuments.map(doc => (
-                    <div key={doc.name} className="rounded-md border p-2 flex items-center gap-2 text-sm">
-                      <FileText className="w-5 h-5 text-primary" />
-                      <p className="font-medium truncate flex-1">{doc.name}</p>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  ))}
-                </div>
+                <ScrollArea className="max-h-32">
+                  <div className="space-y-2 pt-2 pr-4">
+                    {uploadedDocuments.map(doc => (
+                      <div key={doc.name} className="rounded-md border p-2 flex items-center gap-2 text-sm">
+                        <FileText className="w-5 h-5 text-primary" />
+                        <p className="font-medium truncate flex-1">{doc.name}</p>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
               </div>
             )}
           </CardContent>
         </Card>
         <Card className="flex-shrink-0">
           <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Info className="w-5 h-5" />Tool Instructions</CardTitle></CardHeader>
-          <CardContent className="text-sm text-muted-foreground space-y-2">
-            <p>1. Upload one or more compliance documents (e.g., GDPR, HIPAA, SOC 2).</p>
-            <p>2. Use the dropdown to select which document(s) to use as context for the AI.</p>
-            <p>3. Ask specific questions about compliance requirements, controls, or procedures.</p>
-            <p>4. If the AI can't find an answer in the docs, you can use the 'Imagination' button to get a general knowledge-based response.</p>
-            <p>5. Click the 'Implement' button on an answer to see detailed, multi-cloud (GCP, AWS, Azure) implementation steps with best practices.</p>
-            <p>6. You can edit your questions by clicking the pencil icon to refine the conversation.</p>
+          <CardContent className="text-sm text-muted-foreground">
+            <ScrollArea className="h-48">
+              <div className="space-y-2 pr-4">
+                <p>1. Upload one or more compliance documents (e.g., GDPR, HIPAA, SOC 2).</p>
+                <p>2. Use the dropdown to select which document(s) to use as context for the AI.</p>
+                <p>3. Ask specific questions about compliance requirements, controls, or procedures.</p>
+                <p>4. If the AI can't find an answer in the docs, you can use the 'Imagination' button to get a general knowledge-based response.</p>
+                <p>5. Click the 'Implement' button on an answer to see detailed, multi-cloud (GCP, AWS, Azure) implementation steps with best practices.</p>
+                <p>6. You can edit your questions by clicking the pencil icon to refine the conversation.</p>
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
       <div className="mt-auto pt-4 text-center text-sm text-muted-foreground">
-        <p>Made with {'<3'} by @imranfosec</p>
+        <p>Made with {"<3"} by @imranfosec</p>
       </div>
     </aside>
   );

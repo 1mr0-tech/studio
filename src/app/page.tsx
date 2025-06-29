@@ -259,6 +259,11 @@ export default function CompliancePage() {
     }
   };
 
+  const handleGlobalImaginationClick = () => {
+    if (!question.trim() || isLoading) return;
+    handleImaginationClick(question);
+  };
+
   return (
     <div className="flex h-screen bg-muted/40 font-body">
       <ComplianceSidebar
@@ -292,6 +297,7 @@ export default function CompliancePage() {
         onSetEditingText={setEditingText}
         onImplementClick={handleImplementClick}
         onImaginationClick={handleImaginationClick}
+        onGlobalImaginationClick={handleGlobalImaginationClick}
         onImplSheetOpenChange={setIsImplSheetOpen}
         onImaginationSheetOpenChange={setIsImaginationSheetOpen}
       />
