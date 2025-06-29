@@ -72,10 +72,8 @@ export function ComplianceSidebar({
                     {uploadedDocuments.map(doc => (
                       <div key={doc.name} className="rounded-md border p-2 flex items-center gap-2 text-sm">
                         <FileText className="w-5 h-5 text-primary flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate" title={doc.name}>
-                            {doc.name}
-                          </p>
+                        <div className="flex-1 min-w-0 font-medium truncate" title={doc.name}>
+                          {doc.name}
                         </div>
                         <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
                       </div>
