@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
@@ -102,76 +103,83 @@ export default function CompliancePage() {
   }, [messages]);
   
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    if (!e.target.files) return;
 
     setIsParsing(true);
+    const newDocs: UploadedDoc[] = [];
 
-    const filePromises = Array.from(files).map(file => {
-      return new Promise<UploadedDoc | null>(async (resolve) => {
-        const supportedTypes = ['.txt', '.pdf', '.docx', '.xlsx'];
-        const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-        if (!supportedTypes.includes(fileExtension)) {
-          toast({
-            variant: "destructive",
-            title: "Unsupported file type",
-            description: `Skipping ${file.name}. Please use: ${supportedTypes.join(', ')}`,
-          });
-          resolve(null);
-          return;
-        }
+    try {
+      for (const file of Array.from(e.target.files)) {
+        const extension = file.name.split('.').pop()?.toLowerCase();
+        let content = '';
 
-        try {
-          const arrayBuffer = await file.arrayBuffer();
-          let textContent = '';
-          if (file.name.endsWith('.txt')) {
-            textContent = new TextDecoder().decode(arrayBuffer);
-          } else if (file.name.endsWith('.pdf')) {
-            const typedarray = new Uint8Array(arrayBuffer);
-            const pdf = await pdfjsLib.getDocument(typedarray).promise;
-            let pdfText = '';
+        const fileContent = await new Promise<string | ArrayBuffer>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result!);
+          reader.onerror = reject;
+          if (extension === 'pdf' || extension === 'docx' || extension === 'xlsx') {
+            reader.readAsArrayBuffer(file);
+          } else {
+            reader.readAsText(file);
+          }
+        });
+
+        switch (extension) {
+          case 'txt':
+            content = fileContent as string;
+            break;
+          case 'pdf': {
+            const data = new Uint8Array(fileContent as ArrayBuffer);
+            const pdf = await pdfjsLib.getDocument({ data }).promise;
+            let text = '';
             for (let i = 1; i <= pdf.numPages; i++) {
               const page = await pdf.getPage(i);
-              const text = await page.getTextContent();
-              pdfText += text.items.map(s => (s as any).str).join(' ');
+              const textContent = await page.getTextContent();
+              text += textContent.items.map(item => (item as any).str).join(' ');
             }
-            textContent = pdfText;
-          } else if (file.name.endsWith('.docx')) {
-            const result = await mammoth.extractRawText({ arrayBuffer });
-            textContent = result.value;
-          } else if (file.name.endsWith('.xlsx')) {
-            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-            let excelContent = '';
+            content = text;
+            break;
+          }
+          case 'docx': {
+            const result = await mammoth.extractRawText({ arrayBuffer: fileContent as ArrayBuffer });
+            content = result.value;
+            break;
+          }
+          case 'xlsx': {
+            const workbook = XLSX.read(fileContent, { type: 'buffer' });
+            let text = '';
             workbook.SheetNames.forEach(sheetName => {
               const worksheet = workbook.Sheets[sheetName];
-              const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-              excelContent += json.map(row => (row as any[]).join(' ')).join('\n');
+              text += XLSX.utils.sheet_to_csv(worksheet);
             });
-            textContent = excelContent;
+            content = text;
+            break;
           }
-          resolve({ name: file.name, content: textContent });
-        } catch (error) {
-          console.error("Error parsing file:", error);
-          toast({ variant: "destructive", title: "File parsing error", description: `Could not read ${file.name}.` });
-          resolve(null);
+          default:
+            toast({
+              variant: "destructive",
+              title: "Unsupported File Type",
+              description: `File type for ${file.name} is not supported.`,
+            });
+            continue;
         }
+
+        newDocs.push({ name: file.name, content });
+      }
+
+      setUploadedDocuments(docs => [...docs, ...newDocs]);
+
+    } catch (error) {
+      console.error("Error parsing file:", error);
+      toast({
+        variant: "destructive",
+        title: "File Parsing Error",
+        description: "There was an error processing one or more of your files.",
       });
-    });
-
-    const newDocs = (await Promise.all(filePromises)).filter((doc): doc is UploadedDoc => doc !== null);
-    
-    setUploadedDocuments(prevDocs => {
-      const existingNames = new Set(prevDocs.map(d => d.name));
-      const uniqueNewDocs = newDocs.filter(d => !existingNames.has(d.name));
-      return [...prevDocs, ...uniqueNewDocs];
-    });
-
-    if (messages.length === 0) {
-      setMessages([{ id: Date.now(), role: 'ai', content: `Document(s) loaded. How can I help you?` }]);
+    } finally {
+      setIsParsing(false);
+      e.target.value = '';
     }
-    
-    setIsParsing(false);
-    e.target.value = '';
   };
   
   const handleDeleteDocument = (docName: string) => {
