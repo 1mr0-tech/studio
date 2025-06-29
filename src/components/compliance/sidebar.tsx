@@ -72,7 +72,11 @@ export function ComplianceSidebar({
                     {uploadedDocuments.map(doc => (
                       <div key={doc.name} className="rounded-md border p-2 flex items-center gap-2 text-sm">
                         <FileText className="w-5 h-5 text-primary flex-shrink-0" />
-                        <p className="font-medium flex-1 min-w-0 truncate" title={doc.name}>{doc.name}</p>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate" title={doc.name}>
+                            {doc.name}
+                          </p>
+                        </div>
                         <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
                       </div>
                     ))}
@@ -99,7 +103,7 @@ export function ComplianceSidebar({
         </Card>
       </div>
       <div className="mt-auto pt-4 text-center text-sm text-muted-foreground">
-        <p>Made with {"<3"} by @imranfosec</p>
+        <p>Made with {'<3'} by @imranfosec</p>
       </div>
     </aside>
   );
