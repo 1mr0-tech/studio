@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
-import { complianceQuestionAnswering, useImagination, type Implementation, type UploadedDoc, type Message } from '@/app/actions';
+import { complianceQuestionAnswering, useImagination } from '@/app/actions';
+import type { Implementation, UploadedDoc, Message } from '@/app/actions';
 import { useToast } from "@/hooks/use-toast";
 import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
