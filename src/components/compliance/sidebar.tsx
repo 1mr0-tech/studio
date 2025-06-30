@@ -2,7 +2,8 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { Bot, FileText, Info, KeyRound, Loader, Trash2, Upload } from 'lucide-react';
+import { Bot, FileText, Info, KeyRound, Loader, Trash2, Upload, BookOpen } from 'lucide-react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -126,7 +127,13 @@ export function ComplianceSidebar({
         </Card>
       </div>
       <div className="mt-auto pt-4 text-center text-sm text-muted-foreground">
-        <p>Made with {'<3'} by @imranfosec</p>
+        <p className="mb-2">Made with {'<3'} by @imranfosec</p>
+        <Button variant="link" size="sm" asChild className="text-muted-foreground">
+          <Link href="/blog">
+            <BookOpen className="mr-2 h-4 w-4" />
+            Read The Development Story
+          </Link>
+        </Button>
       </div>
     </aside>
   );
