@@ -484,8 +484,18 @@ export default function CompliancePage() {
           <DialogHeader>
             <DialogTitle>Enter your Gemini API Key</DialogTitle>
             <DialogDescription>
-              To use Compliance Connect, please provide your own Gemini API key. 
-              Your key is stored only in your browser and is not shared.
+              To use Compliance Connect, please provide your own Gemini API key.
+              Your key is stored only in your browser and is not shared. You can
+              generate a new key from{' '}
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline text-primary"
+              >
+                Google AI Studio
+              </a>
+              .
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
