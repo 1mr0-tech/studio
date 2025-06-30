@@ -432,16 +432,22 @@ export default function CompliancePage() {
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="googleai/gemini-1.5-flash-latest">
-                    <div className="flex flex-col">
-                      <span className="font-medium">Gemini 1.5 Flash</span>
-                      <span className="text-xs text-muted-foreground">Faster, for quick responses.</span>
-                    </div>
-                  </SelectItem>
                   <SelectItem value="googleai/gemini-1.5-pro-latest">
                     <div className="flex flex-col">
                       <span className="font-medium">Gemini 1.5 Pro</span>
-                      <span className="text-xs text-muted-foreground">More elaborate, for detailed analysis.</span>
+                      <span className="text-xs text-muted-foreground">Most capable, for complex analysis.</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="googleai/gemini-1.5-flash-latest">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Gemini 1.5 Flash</span>
+                      <span className="text-xs text-muted-foreground">Fastest, for quick responses.</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="googleai/gemini-pro">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Gemini 1.0 Pro</span>
+                      <span className="text-xs text-muted-foreground">Balanced, for general tasks.</span>
                     </div>
                   </SelectItem>
                 </SelectContent>

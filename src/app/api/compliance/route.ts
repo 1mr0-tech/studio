@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     const ai = genkit({
       plugins: [googleAI({ apiKey })],
-      model: model || 'googleai/gemini-2.0-flash',
+      model: model || 'googleai/gemini-1.5-flash-latest',
     });
 
     const complianceQuestionAnsweringPrompt = ai.definePrompt({
