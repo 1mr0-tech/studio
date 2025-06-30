@@ -84,6 +84,23 @@ export default function CompliancePage() {
     }
   };
 
+  const getAIErrorMessage = (error: unknown): string => {
+    let userFriendlyMessage = "Sorry, I encountered an unexpected error. The response may have been blocked by safety filters or a network issue.";
+    if (error instanceof Error) {
+        const lowerCaseError = error.message.toLowerCase();
+        if (lowerCaseError.includes('api key not valid') || lowerCaseError.includes('api key is invalid') || lowerCaseError.includes('401')) {
+            userFriendlyMessage = "The API key you entered appears to be invalid. Please check the key and try again.";
+        } else if (lowerCaseError.includes('quota')) {
+            userFriendlyMessage = "You have exceeded your API quota. Please check your usage limits in your Google AI Studio account.";
+        } else if (lowerCaseError.includes('timeout')) {
+            userFriendlyMessage = "The request timed out. Please try again later.";
+        } else if (lowerCaseError.includes('500')) {
+            userFriendlyMessage = "The server encountered an error. Please try again later.";
+        }
+    }
+    return userFriendlyMessage;
+  };
+
   // Handlers
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -247,8 +264,8 @@ export default function CompliancePage() {
       
     } catch (error) {
       console.error("Error calling AI:", error);
-      const content = error instanceof Error ? error.message : "Sorry, I encountered an error. The response may have been blocked.";
-      const errorMessage: Message = { id: Date.now(), role: 'ai', content: content };
+      const content = getAIErrorMessage(error);
+      const errorMessage: Message = { id: Date.now(), role: 'ai', content };
       setMessages([...existingMessages, errorMessage]);
       toast({ variant: "destructive", title: "An error occurred", description: content });
     } finally {
@@ -345,7 +362,7 @@ export default function CompliancePage() {
 
     } catch (error) {
         console.error("Error calling imagination AI:", error);
-        const content = error instanceof Error ? error.message : "Sorry, I encountered an error while trying to generate a response.";
+        const content = getAIErrorMessage(error);
         const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: content };
         setImaginationMessages([initialUserMessage, errorMessage]);
         toast({ variant: "destructive", title: "An error occurred", description: content });
@@ -395,7 +412,7 @@ export default function CompliancePage() {
         setImaginationMessages(messages => [...messages, aiMessage]);
     } catch (error) {
         console.error("Error calling imagination AI:", error);
-        const content = error instanceof Error ? error.message : "Sorry, I encountered an error.";
+        const content = getAIErrorMessage(error);
         const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: content };
         setImaginationMessages(messages => [...messages, errorMessage]);
         toast({ variant: "destructive", title: "An error occurred", description: content });
