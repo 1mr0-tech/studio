@@ -1,10 +1,10 @@
-# Compliance Copilot
+# Compliance Assist
 
-Compliance Copilot is an AI-powered assistant designed to help developers and security professionals navigate the complex world of compliance. By uploading your organization's compliance documents (like GDPR, SOC 2, or HIPAA policies), you can ask plain-language questions and receive direct, context-aware answers grounded in your own policies.
+Compliance Assist is an AI-powered assistant designed to help developers and security professionals navigate the complex world of compliance. By uploading your organization's compliance documents (like GDPR, SOC 2, or HIPAA policies), you can ask plain-language questions and receive direct, context-aware answers grounded in your own policies.
 
 Beyond simple Q&A, the tool generates actionable, step-by-step implementation guides for Google Cloud Platform (GCP), Amazon Web Services (AWS), and Microsoft Azure, turning high-level policy requirements into concrete technical steps.
 
-![Compliance Copilot Screenshot](https://placehold.co/800x600.png)
+![Compliance Assist Screenshot](https://placehold.co/800x600.png)
 
 ---
 
