@@ -38,20 +38,13 @@ export async function POST(req: Request) {
         }
     });
 
-    const complianceQuestionAnsweringFlow = ai.defineFlow(
-        {
-            name: 'complianceQuestionAnsweringFlow',
-            inputSchema: ComplianceQuestionAnsweringInputSchema,
-            outputSchema: ComplianceQuestionAnsweringOutputSchema,
-        },
-        async (input) => {
-            const {output} = await complianceQuestionAnsweringPrompt(input);
-            return output!;
-        }
-    );
+    const { output } = await complianceQuestionAnsweringPrompt(complianceInput as ComplianceQuestionAnsweringInput);
+
+    if (!output) {
+      throw new Error("The AI model did not return a valid output.");
+    }
     
-    const result = await complianceQuestionAnsweringFlow(complianceInput as ComplianceQuestionAnsweringInput);
-    return NextResponse.json(result);
+    return NextResponse.json(output);
 
   } catch (error) {
     console.error('[Compliance API Error]', error);

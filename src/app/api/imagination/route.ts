@@ -33,26 +33,20 @@ export async function POST(req: Request) {
       name: 'imaginationPrompt',
       input: { schema: ImaginationInputSchema },
       output: { schema: ImaginationOutputSchema },
-      prompt: IMAGAGINATION_PROMPT_TEMPLATE,
+      prompt: IMAGINATION_PROMPT_TEMPLATE,
       config: {
         model: model || 'googleai/gemini-2.5-flash-latest',
       }
     });
 
-    const useImaginationFlow = ai.defineFlow(
-      {
-        name: 'useImaginationFlow',
-        inputSchema: ImaginationInputSchema,
-        outputSchema: ImaginationOutputSchema,
-      },
-      async (input) => {
-        const { output } = await imaginationPrompt(input);
-        return output!;
-      }
-    );
+    const { output } = await imaginationPrompt(imaginationInput as ImaginationInput);
+    
+    if (!output) {
+      throw new Error("The AI model did not return a valid output.");
+    }
 
-    const result = await useImaginationFlow(imaginationInput as ImaginationInput);
-    return NextResponse.json(result);
+    return NextResponse.json(output);
+
   } catch (error) {
     console.error('[Imagination API Error]', error);
     const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
