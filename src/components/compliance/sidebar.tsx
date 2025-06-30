@@ -94,10 +94,10 @@ export function ComplianceSidebar({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <div className="flex-1 min-w-0 font-medium whitespace-nowrap overflow-hidden">
-                                {doc.name.length > 30 ? `${doc.name.substring(0, 30)}...` : doc.name}
+                                {doc.name.length > 25 ? `${doc.name.substring(0, 25)}...` : doc.name}
                               </div>
                             </TooltipTrigger>
-                            {doc.name.length > 30 && <TooltipContent><p>{doc.name}</p></TooltipContent>}
+                            {doc.name.length > 25 && <TooltipContent><p>{doc.name}</p></TooltipContent>}
                           </Tooltip>
                           <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
                         </div>
