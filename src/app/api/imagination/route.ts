@@ -27,14 +27,16 @@ export async function POST(req: Request) {
 
     const ai = genkit({
       plugins: [googleAI({ apiKey })],
-      model: model || 'googleai/gemini-2.5-flash-latest',
     });
 
     const imaginationPrompt = ai.definePrompt({
       name: 'imaginationPrompt',
       input: { schema: ImaginationInputSchema },
       output: { schema: ImaginationOutputSchema },
-      prompt: IMAGINATION_PROMPT_TEMPLATE,
+      prompt: IMAGAGINATION_PROMPT_TEMPLATE,
+      config: {
+        model: model || 'googleai/gemini-2.5-flash-latest',
+      }
     });
 
     const useImaginationFlow = ai.defineFlow(
