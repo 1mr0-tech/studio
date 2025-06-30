@@ -134,9 +134,9 @@ const complianceQuestionAnsweringPrompt = ai.definePrompt({
 `} />
                             <p>This change, proposed and executed by the AI, not only fixed the bug but also improved the project's architecture by separating concerns.</p>
 
-                            <h3 className="text-2xl font-semibold font-headline mt-6">Example 2: The Slow Startup and the `pdfjs-dist` Warning</h3>
-                            <p>After implementing the PDF parsing functionality, the application's startup time plummeted. The Next.js development server would take over 25 seconds to compile the main page. Additionally, a cryptic warning appeared in the logs: `Warning: Please use the \`legacy\` build in Node.js environments.`</p>
-                            <p>I presented the server logs to the Firebase Studio AI. It correctly diagnosed that both issues stemmed from the static import of the `pdfjs-dist` library. This large library was being included in the initial server-side bundle, causing bloat and the environment-specific warning.</p>
+                            <h3 className="text-2xl font-semibold font-headline mt-6">Example 2: The Slow Startup and the \`pdfjs-dist\` Warning</h3>
+                            <p>After implementing the PDF parsing functionality, the application's startup time plummeted. The Next.js development server would take over 25 seconds to compile the main page. Additionally, a cryptic warning appeared in the logs: \`Warning: Please use the \`legacy\` build in Node.js environments.\`</p>
+                            <p>I presented the server logs to the Firebase Studio AI. It correctly diagnosed that both issues stemmed from the static import of the \`pdfjs-dist\` library. This large library was being included in the initial server-side bundle, causing bloat and the environment-specific warning.</p>
                             <p>The solution was to switch to a dynamic import. This meant the library would only be loaded on the client-side at the moment a user actually tried to upload a PDF file.</p>
                             <p>The code before the fix:</p>
                             <BlogCode code={`
@@ -170,7 +170,7 @@ const parsePdf = async (file: File): Promise<string> => {
                         <section>
                             <h2 className="text-3xl font-bold font-headline">5. Communicating Change: The AI's Method of Operation</h2>
                             <p>One of the most unique aspects of developing in Firebase Studio is how the AI partner communicates and applies changes. It doesn't just provide a snippet of code in the chat; it proposes a complete, machine-readable plan for file modifications. This approach is built on a specific XML format that ensures clarity, precision, and safety.</p>
-                            <p>When I request a change, the AI responds with a conversational preamble, followed by a special `<changes>` block. This block acts as a transaction, detailing every file that will be touched.</p>
+                            <p>When I request a change, the AI responds with a conversational preamble, followed by a special \`<changes>\` block. This block acts as a transaction, detailing every file that will be touched.</p>
                             <p>The structure looks like this:</p>
                             <BlogCode language="xml" code={`
 <changes>
@@ -181,4 +181,5 @@ const parsePdf = async (file: File): Promise<string> => {
     <content><![CDATA[
       The ENTIRE, FINAL, intended content of the file goes here.
       It is not a diff or a patch, but the complete file content.
+    
     
