@@ -63,8 +63,8 @@ export default function CompliancePage() {
   const [apiKey, setApiKey] = useState<string>('');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [tempApiKey, setTempApiKey] = useState<string>('');
-  const [selectedModel, setSelectedModel] = useState<string>('googleai/gemini-1.5-flash-latest');
-  const [tempSelectedModel, setTempSelectedModel] = useState<string>('googleai/gemini-1.5-flash-latest');
+  const [selectedModel, setSelectedModel] = useState<string>('googleai/gemini-2.5-flash-latest');
+  const [tempSelectedModel, setTempSelectedModel] = useState<string>('googleai/gemini-2.5-flash-latest');
 
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDoc[]>([]);
   const [isParsing, setIsParsing] = useState<boolean>(false);
@@ -436,6 +436,12 @@ export default function CompliancePage() {
                     <div className="flex flex-col">
                       <span className="font-medium">Gemini 1.5 Pro</span>
                       <span className="text-xs text-muted-foreground">Most capable, for complex analysis.</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="googleai/gemini-2.5-flash-latest">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Gemini 2.5 Flash</span>
+                      <span className="text-xs text-muted-foreground">Newest generation, for advanced speed.</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="googleai/gemini-1.5-flash-latest">
