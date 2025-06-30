@@ -175,7 +175,8 @@ export default function CompliancePage() {
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`API error: ${response.status} - ${errorText || response.statusText}`);
       }
       
       const aiResult = await response.json();
@@ -202,9 +203,10 @@ export default function CompliancePage() {
       
     } catch (error) {
       console.error("Error calling AI:", error);
-      const errorMessage: Message = { id: Date.now(), role: 'ai', content: "Sorry, I encountered an error. The response may have been blocked." };
+      const content = error instanceof Error ? error.message : "Sorry, I encountered an error. The response may have been blocked.";
+      const errorMessage: Message = { id: Date.now(), role: 'ai', content: content };
       setMessages([...existingMessages, errorMessage]);
-      toast({ variant: "destructive", title: "An error occurred", description: "Failed to get a response from the AI." });
+      toast({ variant: "destructive", title: "An error occurred", description: content });
     } finally {
       setIsLoading(false);
     }
@@ -286,7 +288,8 @@ export default function CompliancePage() {
         });
 
         if (!response.ok) {
-          throw new Error(`API error: ${response.statusText}`);
+          const errorText = await response.text();
+          throw new Error(`API error: ${response.status} - ${errorText || response.statusText}`);
         }
 
         const result = await response.json();
@@ -295,9 +298,10 @@ export default function CompliancePage() {
 
     } catch (error) {
         console.error("Error calling imagination AI:", error);
-        const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: "Sorry, I encountered an error while trying to generate a response." };
+        const content = error instanceof Error ? error.message : "Sorry, I encountered an error while trying to generate a response.";
+        const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: content };
         setImaginationMessages([initialUserMessage, errorMessage]);
-        toast({ variant: "destructive", title: "An error occurred", description: "Failed to get a response from the imagination AI." });
+        toast({ variant: "destructive", title: "An error occurred", description: content });
     } finally {
         setIsImaginationLoading(false);
     }
@@ -332,15 +336,19 @@ export default function CompliancePage() {
             chatHistory: imaginationHistory, 
           }),
         });
-        if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`API error: ${response.status} - ${errorText || response.statusText}`);
+        }
         const result = await response.json();
         const aiMessage: Message = { id: Date.now() + 1, role: 'ai', content: result.answer };
         setImaginationMessages(messages => [...messages, aiMessage]);
     } catch (error) {
         console.error("Error calling imagination AI:", error);
-        const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: "Sorry, I encountered an error." };
+        const content = error instanceof Error ? error.message : "Sorry, I encountered an error.";
+        const errorMessage: Message = { id: Date.now() + 1, role: 'ai', content: content };
         setImaginationMessages(messages => [...messages, errorMessage]);
-        toast({ variant: "destructive", title: "An error occurred", description: "Failed to get a response from the imagination AI." });
+        toast({ variant: "destructive", title: "An error occurred", description: content });
     } finally {
         setIsImaginationLoading(false);
     }
