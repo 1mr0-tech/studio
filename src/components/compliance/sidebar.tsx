@@ -2,7 +2,7 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { Bot, FileText, Info, Loader, Trash2, Upload } from 'lucide-react';
+import { Bot, FileText, Info, KeyRound, Loader, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ interface ComplianceSidebarProps {
   handleFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
   handleDeleteDocument: (docName: string) => void;
   onContextChange: (value: string) => void;
+  onApiKeyClick: () => void;
 }
 
 export function ComplianceSidebar({
@@ -29,6 +30,7 @@ export function ComplianceSidebar({
   handleFileChange,
   handleDeleteDocument,
   onContextChange,
+  onApiKeyClick,
 }: ComplianceSidebarProps) {
   return (
     <aside className="w-[400px] flex-shrink-0 bg-background p-4 flex flex-col gap-6 border-r">
@@ -38,7 +40,22 @@ export function ComplianceSidebar({
             <Bot className="w-8 h-8 text-primary" />
             <h1 className="text-2xl font-bold font-headline">Compliance Connect</h1>
           </div>
-          <ModeToggle />
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={onApiKeyClick}>
+                    <KeyRound className="w-5 h-5" />
+                    <span className="sr-only">API Key</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Manage API Key</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <ModeToggle />
+          </div>
         </div>
         <Card className="flex-shrink-0">
           <CardHeader>
@@ -76,7 +93,7 @@ export function ComplianceSidebar({
                           <FileText className="w-5 h-5 text-primary flex-shrink-0" />
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex-1 min-w-0 font-medium" title={doc.name}>
+                              <div className="flex-1 min-w-0 truncate font-medium" title={doc.name}>
                                 {doc.name.length > 30 ? `${doc.name.substring(0, 30)}...` : doc.name}
                               </div>
                             </TooltipTrigger>

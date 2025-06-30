@@ -19,6 +19,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { BrainCircuit } from 'lucide-react';
 
 export default function CompliancePage() {
@@ -43,12 +54,21 @@ export default function CompliancePage() {
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState('');
   const [suggestionDialog, setSuggestionDialog] = useState<{open: boolean; question: string; suggestion: string}>({ open: false, question: '', suggestion: '' });
+  
+  const [apiKey, setApiKey] = useState<string>('');
+  const [tempApiKey, setTempApiKey] = useState<string>('');
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Effects
   useEffect(() => {
     pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
+    const storedApiKey = localStorage.getItem('gemini-api-key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+      setTempApiKey(storedApiKey);
+    }
   }, []);
 
   const scrollToBottom = () => {
@@ -58,6 +78,17 @@ export default function CompliancePage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, imaginationMessages]);
+  
+  const handleApiKeySubmit = () => {
+    if (tempApiKey && tempApiKey.trim()) {
+      setApiKey(tempApiKey);
+      localStorage.setItem('gemini-api-key', tempApiKey);
+      setIsApiKeyModalOpen(false);
+      toast({ title: "API Key Saved", description: "Your Gemini API key has been saved." });
+    } else {
+      toast({ variant: "destructive", title: "API Key Required", description: "Please enter a valid API key." });
+    }
+  };
 
   // Handlers
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -126,6 +157,10 @@ export default function CompliancePage() {
       }
 
       setUploadedDocuments(docs => [...docs, ...newDocs]);
+      
+      if (!localStorage.getItem('gemini-api-key') && newDocs.length > 0) {
+        setIsApiKeyModalOpen(true);
+      }
 
     } catch (error) {
       console.error("Error parsing file:", error);
@@ -148,8 +183,20 @@ export default function CompliancePage() {
       setSelectedContext('all');
     }
   };
+  
+  const checkApiKey = () => {
+    if (!apiKey) {
+      setIsApiKeyModalOpen(true);
+      toast({ variant: 'destructive', title: 'API Key Missing', description: 'Please enter your Gemini API key to continue.' });
+      return false;
+    }
+    return true;
+  }
 
   const askAI = async (questionToAsk: string, existingMessages: Message[]) => {
+    if (!checkApiKey()) {
+      return;
+    }
     setIsLoading(true);
     let contextDocs = uploadedDocuments;
     if (selectedContext !== 'all') {
@@ -167,7 +214,10 @@ export default function CompliancePage() {
     try {
       const response = await fetch('/api/compliance', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Gemini-API-Key': apiKey,
+        },
         body: JSON.stringify({
           complianceDocuments: combinedContent,
           userQuestion: questionToAsk,
@@ -257,7 +307,7 @@ export default function CompliancePage() {
   };
 
   const handleImaginationClick = async (userQuestion: string) => {
-    if (!userQuestion || isImaginationLoading) return;
+    if (!userQuestion || isImaginationLoading || !checkApiKey()) return;
     
     setCurrentImaginationQuery(userQuestion);
     setIsImaginationSheetOpen(true);
@@ -279,7 +329,10 @@ export default function CompliancePage() {
     try {
         const response = await fetch('/api/imagination', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Gemini-API-Key': apiKey,
+          },
           body: JSON.stringify({ 
             userQuestion: userQuestion,
             complianceDocuments: combinedContent,
@@ -309,7 +362,7 @@ export default function CompliancePage() {
 
   const handleImaginationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!imaginationQuestion.trim() || isImaginationLoading) return;
+    if (!imaginationQuestion.trim() || isImaginationLoading || !checkApiKey()) return;
 
     const userMessage: Message = { id: Date.now(), role: 'user', content: imaginationQuestion };
     const newImaginationMessages = [...imaginationMessages, userMessage];
@@ -329,7 +382,10 @@ export default function CompliancePage() {
     try {
         const response = await fetch('/api/imagination', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'X-Gemini-API-Key': apiKey,
+          },
           body: JSON.stringify({ 
             userQuestion: questionToSubmit,
             complianceDocuments: combinedContent,
@@ -371,6 +427,7 @@ export default function CompliancePage() {
           handleFileChange={handleFileChange}
           handleDeleteDocument={handleDeleteDocument}
           onContextChange={setSelectedContext}
+          onApiKeyClick={() => setIsApiKeyModalOpen(true)}
         />
         <ChatInterface
           messages={messages}
@@ -422,6 +479,35 @@ export default function CompliancePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <Dialog open={isApiKeyModalOpen} onOpenChange={setIsApiKeyModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Enter your Gemini API Key</DialogTitle>
+            <DialogDescription>
+              To use Compliance Connect, please provide your own Gemini API key. 
+              Your key is stored only in your browser and is not shared.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="api-key" className="text-right">
+                API Key
+              </Label>
+              <Input
+                id="api-key"
+                type="password"
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter your API key"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit" onClick={handleApiKeySubmit}>Save Key</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
