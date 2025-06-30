@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ModeToggle } from '@/components/mode-toggle';
 import type { UploadedDoc } from '@/ai/types';
 import { ScrollArea } from '../ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface ComplianceSidebarProps {
   isParsing: boolean;
@@ -35,7 +36,7 @@ export function ComplianceSidebar({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Bot className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold font-headline">Compliance Copilot</h1>
+            <h1 className="text-2xl font-bold font-headline">Compliance Connect</h1>
           </div>
           <ModeToggle />
         </div>
@@ -69,15 +70,22 @@ export function ComplianceSidebar({
                 </Select>
                 <ScrollArea className="h-40">
                   <div className="space-y-2 pt-2 pr-4">
-                    {uploadedDocuments.map(doc => (
-                      <div key={doc.name} className="rounded-md border p-2 flex items-center gap-2 text-sm">
-                        <FileText className="w-5 h-5 text-primary flex-shrink-0" />
-                        <div className="flex-1 min-w-0 font-medium truncate" title={doc.name}>
-                          {doc.name}
+                    <TooltipProvider delayDuration={100}>
+                      {uploadedDocuments.map(doc => (
+                        <div key={doc.name} className="rounded-md border p-2 flex items-center gap-2 text-sm">
+                          <FileText className="w-5 h-5 text-primary flex-shrink-0" />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex-1 min-w-0 font-medium" title={doc.name}>
+                                {doc.name.length > 30 ? `${doc.name.substring(0, 30)}...` : doc.name}
+                              </div>
+                            </TooltipTrigger>
+                            {doc.name.length > 30 && <TooltipContent><p>{doc.name}</p></TooltipContent>}
+                          </Tooltip>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => handleDeleteDocument(doc.name)}><Trash2 className="w-4 h-4" /></Button>
-                      </div>
-                    ))}
+                      ))}
+                    </TooltipProvider>
                   </div>
                 </ScrollArea>
               </div>

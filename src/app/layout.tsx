@@ -4,8 +4,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Compliance Assist',
-  description: 'Your AI partner for navigating GCP compliance.',
+  title: 'Compliance Connect',
+  description: 'Your AI partner for navigating compliance.',
 };
 
 export default function RootLayout({

@@ -5,11 +5,16 @@ export const ImplementationStepSchema = z.object({
   step: z.string().describe('A clear, concise title for the implementation step.'),
   command: z
     .string()
-    .describe('The CLI command or code snippet for this step.'),
+    .describe('The CLI command, code snippet, or console instructions for this step.'),
   bestPractice: z
     .string()
     .optional()
     .describe('A best practice or important consideration for this step.'),
+  referenceUrl: z
+    .string()
+    .url()
+    .optional()
+    .describe('An official documentation link from the cloud provider relevant to this step.')
 });
 
 export const ImplementationSchema = z.object({

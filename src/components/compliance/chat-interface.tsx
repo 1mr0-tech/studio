@@ -46,9 +46,19 @@ function renderImplementationSteps(steps: ImplementationStep[] | undefined) {
                               </div>
                           )}
                           <div>
-                              <h4 className="font-semibold text-sm mb-1">Command:</h4>
+                              <h4 className="font-semibold text-sm mb-1">Instructions:</h4>
                               <CodeBlock code={item.command} />
                           </div>
+                          {item.referenceUrl && (
+                              <div>
+                                <Button asChild variant="link" size="sm" className="p-0 h-auto font-normal text-muted-foreground hover:text-primary">
+                                    <a href={item.referenceUrl} target="_blank" rel="noopener noreferrer">
+                                        <ExternalLink className="mr-1 h-3 w-3" />
+                                        Reference Documentation
+                                    </a>
+                                </Button>
+                              </div>
+                          )}
                       </AccordionContent>
                   </AccordionItem>
               ))}
