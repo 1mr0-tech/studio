@@ -12,9 +12,8 @@ export const ImplementationStepSchema = z.object({
     .describe('A best practice or important consideration for this step.'),
   referenceUrl: z
     .string()
-    .url()
     .optional()
-    .describe('An official documentation link from the cloud provider relevant to this step.')
+    .describe('An official documentation link from the cloud provider relevant to this step. Must be a valid URL.')
 });
 
 export const ImplementationSchema = z.object({
