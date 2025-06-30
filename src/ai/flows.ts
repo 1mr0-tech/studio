@@ -39,9 +39,7 @@ Your response MUST follow these rules, in this order:
 
 3.  **Handle Missing Answers**: If you absolutely cannot find the answer in the documents for the user's question, you MUST set 'answerFound' to false. In this case, the 'answer' field should state that the information was not found. Then, set 'suggestsImagination' to true and provide a message in 'imaginationSuggestion' inviting the user to try answering from your general knowledge. The 'implementation' field should still be populated with general best practices if possible, or left empty if not.
 
-4.  **Formatting and Links**: If you find a relevant official Google Cloud documentation link while answering, include it in the 'googleCloudDocUrl' field.
-
-5.  **Schema Adherence**: Structure your entire response according to the output schema.
+4.  **Schema Adherence**: Structure your entire response according to the output schema.
 `,
 });
 

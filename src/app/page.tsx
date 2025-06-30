@@ -185,7 +185,6 @@ export default function CompliancePage() {
         role: 'ai',
         content: aiResult.answer,
         implementation: aiResult.implementation,
-        googleCloudDocUrl: aiResult.googleCloudDocUrl,
         answerFound: aiResult.answerFound,
         userQuestion: questionToAsk,
         suggestsImagination: aiResult.suggestsImagination,

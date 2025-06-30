@@ -42,12 +42,6 @@ export const ComplianceQuestionAnsweringOutputSchema = z.object({
     .describe(
       'The answer to the user question, based *only* on the provided compliance documents. If no answer is found, state that and suggest using the "Imagination" feature.'
     ),
-  googleCloudDocUrl: z
-    .string()
-    .optional()
-    .describe(
-      'A relevant Google Cloud documentation URL, if applicable. Only include if highly relevant.'
-    ),
   implementation: ImplementationSchema.describe(
     'Step-by-step guidance for GCP, AWS, and Azure. If the question is about implementation, provide direct steps. If not, provide general security best practices related to the answer.'
   ),
@@ -77,7 +71,6 @@ export type Message = {
   role: 'user' | 'ai';
   content: string;
   implementation?: Implementation;
-  googleCloudDocUrl?: string;
   answerFound?: boolean;
   userQuestion?: string;
   suggestsImagination?: boolean;
