@@ -432,28 +432,40 @@ export default function CompliancePage() {
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="googleai/gemini-1.5-pro-latest">
+                  <SelectItem value="googleai/gemini-2.5-pro-latest">
                     <div className="flex flex-col">
-                      <span className="font-medium">Gemini 1.5 Pro</span>
-                      <span className="text-xs text-muted-foreground">Most capable, for complex analysis.</span>
+                      <span className="font-medium">Gemini 2.5 Pro</span>
+                      <span className="text-xs text-muted-foreground">Most powerful, for complex reasoning.</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="googleai/gemini-2.5-flash-latest">
                     <div className="flex flex-col">
                       <span className="font-medium">Gemini 2.5 Flash</span>
-                      <span className="text-xs text-muted-foreground">Newest generation, for advanced speed.</span>
+                      <span className="text-xs text-muted-foreground">Newest generation, for speed and cost. (Default)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="googleai/gemini-2.0-flash">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Gemini 2.0 Flash</span>
+                      <span className="text-xs text-muted-foreground">Next-gen speed and efficiency.</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="googleai/gemini-2.0-flash-lite">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Gemini 2.0 Flash Lite</span>
+                      <span className="text-xs text-muted-foreground">Lightweight and fast for simple tasks.</span>
                     </div>
                   </SelectItem>
                   <SelectItem value="googleai/gemini-1.5-flash-latest">
                     <div className="flex flex-col">
                       <span className="font-medium">Gemini 1.5 Flash</span>
-                      <span className="text-xs text-muted-foreground">Fastest, for quick responses.</span>
+                      <span className="text-xs text-muted-foreground">Fast, with a large context window.</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="googleai/gemini-pro">
+                  <SelectItem value="googleai/gemini-1.5-pro-latest">
                     <div className="flex flex-col">
-                      <span className="font-medium">Gemini 1.0 Pro</span>
-                      <span className="text-xs text-muted-foreground">Balanced, for general tasks.</span>
+                      <span className="font-medium">Gemini 1.5 Pro</span>
+                      <span className="text-xs text-muted-foreground">Powerful, with a large context window.</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
