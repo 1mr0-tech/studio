@@ -41,7 +41,7 @@ function renderImplementationSteps(steps: ImplementationStep[] | undefined) {
                       <AccordionContent className="pt-2 space-y-4">
                           <div>
                               <h4 className="font-semibold text-sm mb-1">Instructions:</h4>
-                              <CodeBlock code={item.instruction} />
+                              <CodeBlock code={item.command} />
                           </div>
                           {item.referenceUrl && (
                               <div>

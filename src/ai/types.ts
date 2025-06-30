@@ -3,7 +3,7 @@ import {z} from 'zod';
 
 export const ImplementationStepSchema = z.object({
   step: z.string().describe('A clear, concise title for the implementation step.'),
-  instruction: z
+  command: z
     .string()
     .describe('The CLI command, code snippet, or console instructions for this step.'),
   referenceUrl: z
