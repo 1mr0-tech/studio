@@ -10,9 +10,9 @@ export const metadata: Metadata = {
     description: 'A detailed journey through the development of Compliance Copilot, an AI-powered tool for navigating compliance, built with Firebase Studio.',
 };
 
-const BlogCode = ({ code }: { code: string }) => (
-    <CodeBlock code={code} className="my-4" />
-);
+function BlogCode({ code }: { code: string }) {
+    return <CodeBlock code={code} className="my-4" />;
+}
 
 export default function BlogPage() {
     return (
