@@ -39,15 +39,9 @@ function renderImplementationSteps(steps: ImplementationStep[] | undefined) {
                           </div>
                       </AccordionTrigger>
                       <AccordionContent className="pt-2 space-y-4">
-                          {item.bestPractice && (
-                              <div>
-                                  <h4 className="font-semibold text-sm mb-1">Best Practice:</h4>
-                                  <p className="text-sm text-muted-foreground">{item.bestPractice}</p>
-                              </div>
-                          )}
                           <div>
                               <h4 className="font-semibold text-sm mb-1">Instructions:</h4>
-                              <CodeBlock code={item.command} />
+                              <CodeBlock code={item.instruction} />
                           </div>
                           {item.referenceUrl && (
                               <div>

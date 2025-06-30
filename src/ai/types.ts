@@ -3,17 +3,13 @@ import {z} from 'zod';
 
 export const ImplementationStepSchema = z.object({
   step: z.string().describe('A clear, concise title for the implementation step.'),
-  command: z
+  instruction: z
     .string()
     .describe('The CLI command, code snippet, or console instructions for this step.'),
-  bestPractice: z
-    .string()
-    .optional()
-    .describe('A best practice or important consideration for this step.'),
   referenceUrl: z
     .string()
     .optional()
-    .describe('An official documentation link from the cloud provider relevant to this step. Must be a valid URL.')
+    .describe('An official documentation link from the cloud provider relevant to this step.')
 });
 
 export const ImplementationSchema = z.object({
