@@ -21,9 +21,12 @@ export async function POST(req: Request) {
   }
 
   try {
+    const body = await req.json();
+    const { model, ...complianceInput } = body;
+
     const ai = genkit({
       plugins: [googleAI({ apiKey })],
-      model: 'googleai/gemini-2.0-flash',
+      model: model || 'googleai/gemini-2.0-flash',
     });
 
     const complianceQuestionAnsweringPrompt = ai.definePrompt({
@@ -44,9 +47,8 @@ export async function POST(req: Request) {
             return output!;
         }
     );
-
-    const body = (await req.json()) as ComplianceQuestionAnsweringInput;
-    const result = await complianceQuestionAnsweringFlow(body);
+    
+    const result = await complianceQuestionAnsweringFlow(complianceInput as ComplianceQuestionAnsweringInput);
     return NextResponse.json(result);
 
   } catch (error) {

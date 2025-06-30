@@ -126,7 +126,7 @@ export function ComplianceSidebar({
         </Card>
       </div>
       <div className="mt-auto pt-4 text-center text-sm text-muted-foreground">
-        <p className="mb-2">Made with {'<3'} by @imranfosec</p>
+        <p className="mb-2">Made with {'<3'} by <a href="https://linktr.ee/imranfosec" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">@imranfosec</a></p>
       </div>
     </aside>
   );

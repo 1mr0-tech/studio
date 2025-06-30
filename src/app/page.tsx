@@ -7,6 +7,7 @@ import { ChatInterface } from '@/components/compliance/chat-interface';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import type { UploadedDoc, Message, Implementation } from '@/ai/types';
 import type { ComplianceQuestionAnsweringOutput, ImaginationOutput } from '@/ai/types';
@@ -62,6 +63,8 @@ export default function CompliancePage() {
   const [apiKey, setApiKey] = useState<string>('');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [tempApiKey, setTempApiKey] = useState<string>('');
+  const [selectedModel, setSelectedModel] = useState<string>('googleai/gemini-1.5-flash-latest');
+  const [tempSelectedModel, setTempSelectedModel] = useState<string>('googleai/gemini-1.5-flash-latest');
 
   const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDoc[]>([]);
   const [isParsing, setIsParsing] = useState<boolean>(false);
@@ -87,10 +90,16 @@ export default function CompliancePage() {
 
   useEffect(() => {
     const storedKey = sessionStorage.getItem('gemini-api-key');
+    const storedModel = sessionStorage.getItem('gemini-model');
     if (storedKey) {
       setApiKey(storedKey);
+      setTempApiKey(storedKey);
     } else {
       setIsApiKeyModalOpen(true);
+    }
+    if (storedModel) {
+      setSelectedModel(storedModel);
+      setTempSelectedModel(storedModel);
     }
   }, []);
   
@@ -101,11 +110,13 @@ export default function CompliancePage() {
   const handleApiKeySave = () => {
     if (tempApiKey.trim()) {
       setApiKey(tempApiKey);
+      setSelectedModel(tempSelectedModel);
       sessionStorage.setItem('gemini-api-key', tempApiKey);
+      sessionStorage.setItem('gemini-model', tempSelectedModel);
       setIsApiKeyModalOpen(false);
       toast({
         title: "API Key Saved",
-        description: "Your API key has been saved for this session.",
+        description: "Your API key and model selection have been saved for this session.",
       });
     }
   };
@@ -208,7 +219,7 @@ export default function CompliancePage() {
           'Content-Type': 'application/json',
           'X-Gemini-API-Key': apiKey,
         },
-        body: JSON.stringify({ userQuestion, complianceDocuments }),
+        body: JSON.stringify({ model: selectedModel, userQuestion, complianceDocuments }),
       });
 
       if (!response.ok) {
@@ -324,7 +335,7 @@ export default function CompliancePage() {
           'Content-Type': 'application/json',
           'X-Gemini-API-Key': apiKey,
         },
-        body: JSON.stringify({ userQuestion, complianceDocuments, chatHistory }),
+        body: JSON.stringify({ model: selectedModel, userQuestion, complianceDocuments, chatHistory }),
       });
   
       if (!response.ok) {
@@ -402,12 +413,40 @@ export default function CompliancePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Gemini API Key Required</AlertDialogTitle>
             <AlertDialogDescription>
-              Please provide your Gemini API key to use the AI features of this application. Your key is stored only in your browser for this session and is not sent anywhere else.
+              Please provide your Gemini API key to use the AI features. Your key is stored only in your browser for this session.
+              You can get a free API key from{' '}
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                Google AI Studio
+              </a>.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="grid gap-2 py-2">
-            <Label htmlFor="api-key">API Key</Label>
-            <Input id="api-key" type="password" value={tempApiKey} onChange={(e) => setTempApiKey(e.target.value)} placeholder="Enter your key here" />
+          <div className="grid gap-4 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor="api-key">API Key</Label>
+              <Input id="api-key" type="password" value={tempApiKey} onChange={(e) => setTempApiKey(e.target.value)} placeholder="Enter your key here" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="model-select">Gemini Model</Label>
+              <Select value={tempSelectedModel} onValueChange={setTempSelectedModel}>
+                <SelectTrigger id="model-select" className="w-full">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="googleai/gemini-1.5-flash-latest">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Gemini 1.5 Flash</span>
+                      <span className="text-xs text-muted-foreground">Faster, for quick responses.</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="googleai/gemini-1.5-pro-latest">
+                    <div className="flex flex-col">
+                      <span className="font-medium">Gemini 1.5 Pro</span>
+                      <span className="text-xs text-muted-foreground">More elaborate, for detailed analysis.</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <AlertDialogFooter>
             <AlertDialogAction onClick={handleApiKeySave}>Save Key</AlertDialogAction>

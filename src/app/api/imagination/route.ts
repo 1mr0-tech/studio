@@ -22,9 +22,12 @@ export async function POST(req: Request) {
   }
   
   try {
+    const body = await req.json();
+    const { model, ...imaginationInput } = body;
+
     const ai = genkit({
       plugins: [googleAI({ apiKey })],
-      model: 'googleai/gemini-2.0-flash',
+      model: model || 'googleai/gemini-2.0-flash',
     });
 
     const imaginationPrompt = ai.definePrompt({
@@ -46,8 +49,7 @@ export async function POST(req: Request) {
       }
     );
 
-    const body = (await req.json()) as ImaginationInput;
-    const result = await useImaginationFlow(body);
+    const result = await useImaginationFlow(imaginationInput as ImaginationInput);
     return NextResponse.json(result);
   } catch (error) {
     console.error('[Imagination API Error]', error);
