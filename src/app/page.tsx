@@ -4,7 +4,6 @@
 import { useState, type ChangeEvent, useRef, useEffect } from 'react';
 import type { Implementation, UploadedDoc, Message } from '@/ai/types';
 import { useToast } from "@/hooks/use-toast";
-import * as pdfjsLib from 'pdfjs-dist';
 import mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import { ComplianceSidebar } from '@/components/compliance/sidebar';
@@ -62,10 +61,6 @@ export default function CompliancePage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Effects
-  useEffect(() => {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-  }, []);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -106,10 +101,9 @@ export default function CompliancePage() {
     if (!e.target.files) return;
 
     setIsParsing(true);
-    const newDocs: UploadedDoc[] = [];
-
+    
     try {
-      for (const file of Array.from(e.target.files)) {
+      const filePromises = Array.from(e.target.files).map(async (file) => {
         const extension = file.name.split('.').pop()?.toLowerCase();
         let content = '';
 
@@ -129,6 +123,10 @@ export default function CompliancePage() {
             content = fileContent as string;
             break;
           case 'pdf': {
+            const pdfjsLib = await import('pdfjs-dist/build/pdf.mjs');
+            const { version } = await import('pdfjs-dist/package.json');
+            pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
+            
             const data = new Uint8Array(fileContent as ArrayBuffer);
             const pdf = await pdfjsLib.getDocument({ data }).promise;
             let text = '';
@@ -161,15 +159,18 @@ export default function CompliancePage() {
               title: "Unsupported File Type",
               description: `File type for ${file.name} is not supported.`,
             });
-            continue;
+            return null;
         }
 
-        newDocs.push({ name: file.name, content });
-      }
-
-      setUploadedDocuments(docs => [...docs, ...newDocs]);
+        return { name: file.name, content };
+      });
       
-      if (!apiKey && newDocs.length > 0) {
+      const results = await Promise.all(filePromises);
+      const successfulDocs = results.filter((doc): doc is UploadedDoc => doc !== null);
+      
+      setUploadedDocuments(docs => [...docs, ...successfulDocs]);
+      
+      if (!apiKey && successfulDocs.length > 0) {
         setIsApiKeyModalOpen(true);
       }
 
