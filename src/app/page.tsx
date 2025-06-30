@@ -64,11 +64,6 @@ export default function CompliancePage() {
   // Effects
   useEffect(() => {
     pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-    const storedApiKey = localStorage.getItem('gemini-api-key');
-    if (storedApiKey) {
-      setApiKey(storedApiKey);
-      setTempApiKey(storedApiKey);
-    }
   }, []);
 
   const scrollToBottom = () => {
@@ -82,9 +77,8 @@ export default function CompliancePage() {
   const handleApiKeySubmit = () => {
     if (tempApiKey && tempApiKey.trim()) {
       setApiKey(tempApiKey);
-      localStorage.setItem('gemini-api-key', tempApiKey);
       setIsApiKeyModalOpen(false);
-      toast({ title: "API Key Saved", description: "Your Gemini API key has been saved." });
+      toast({ title: "API Key Set", description: "Your Gemini API key will be used for this session." });
     } else {
       toast({ variant: "destructive", title: "API Key Required", description: "Please enter a valid API key." });
     }
@@ -158,7 +152,7 @@ export default function CompliancePage() {
 
       setUploadedDocuments(docs => [...docs, ...newDocs]);
       
-      if (!localStorage.getItem('gemini-api-key') && newDocs.length > 0) {
+      if (!apiKey && newDocs.length > 0) {
         setIsApiKeyModalOpen(true);
       }
 
@@ -485,7 +479,7 @@ export default function CompliancePage() {
             <DialogTitle>Enter your Gemini API Key</DialogTitle>
             <DialogDescription>
               To use Compliance Connect, please provide your own Gemini API key.
-              Your key is stored only in your browser and is not shared. You can
+              Your key is stored only in your browser for this session and is not shared. You can
               generate a new key from{' '}
               <a
                 href="https://aistudio.google.com/app/apikey"
@@ -514,7 +508,7 @@ export default function CompliancePage() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" onClick={handleApiKeySubmit}>Save Key</Button>
+            <Button type="submit" onClick={handleApiKeySubmit}>Set Key</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

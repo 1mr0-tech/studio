@@ -93,7 +93,7 @@ export function ComplianceSidebar({
                           <FileText className="w-5 h-5 text-primary flex-shrink-0" />
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex-1 min-w-0 truncate font-medium" title={doc.name}>
+                              <div className="flex-1 min-w-0 font-medium whitespace-nowrap overflow-hidden">
                                 {doc.name.length > 30 ? `${doc.name.substring(0, 30)}...` : doc.name}
                               </div>
                             </TooltipTrigger>
