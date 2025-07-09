@@ -420,7 +420,7 @@ export default function CompliancePage() {
               </a>.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="grid gap-2 py-2">
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label htmlFor="api-key">API Key</Label>
               <Input id="api-key" type="password" value={tempApiKey} onChange={(e) => setTempApiKey(e.target.value)} placeholder="Enter your key here" />
@@ -428,7 +428,7 @@ export default function CompliancePage() {
             <div className="grid gap-2">
               <Label htmlFor="model-select">Gemini Model</Label>
               <Select value={tempSelectedModel} onValueChange={setTempSelectedModel}>
-                <SelectTrigger id="model-select" className="w-full">
+                <SelectTrigger id="model-select" className="w-full text-left">
                   <SelectValue placeholder="Select a model" />
                 </SelectTrigger>
                 <SelectContent>
