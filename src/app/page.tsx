@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from '@/hooks/use-toast';
 import type { UploadedDoc, Message, Implementation } from '@/ai/types';
 import type { ComplianceQuestionAnsweringOutput, ImaginationOutput } from '@/ai/types';
+import { Loader } from 'lucide-react';
 
 const parseDocx = async (file: File) => {
   const mammoth = (await import('mammoth')).default;
@@ -63,6 +64,8 @@ export default function CompliancePage() {
   const [apiKey, setApiKey] = useState<string>('');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
   const [tempApiKey, setTempApiKey] = useState<string>('');
+  const [isKeyValidating, setIsKeyValidating] = useState<boolean>(false);
+
   const [selectedModel, setSelectedModel] = useState<string>('googleai/gemini-2.5-flash-latest');
   const [tempSelectedModel, setTempSelectedModel] = useState<string>('googleai/gemini-2.5-flash-latest');
 
@@ -107,19 +110,50 @@ export default function CompliancePage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, imaginationMessages]);
 
-  const handleApiKeySave = () => {
-    if (tempApiKey.trim()) {
+  const handleApiKeySave = async () => {
+    if (!tempApiKey.trim()) {
+      toast({ variant: "destructive", title: "API Key Required", description: "Please enter an API key to validate." });
+      return;
+    }
+
+    setIsKeyValidating(true);
+    try {
+      const response = await fetch('/api/validate-key/route', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ apiKey: tempApiKey }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'The API key is invalid or failed validation.');
+      }
+
+      // If we get here, the key is valid.
       setApiKey(tempApiKey);
       setSelectedModel(tempSelectedModel);
       sessionStorage.setItem('gemini-api-key', tempApiKey);
       sessionStorage.setItem('gemini-model', tempSelectedModel);
       setIsApiKeyModalOpen(false);
       toast({
-        title: "API Key Saved",
-        description: "Your API key and model selection have been saved for this session.",
+        title: "API Key Verified & Saved",
+        description: "Your key has been saved for this session.",
       });
+
+    } catch (error) {
+      console.error("API Key validation error:", error);
+      toast({
+        variant: "destructive",
+        title: "Invalid API Key",
+        description: error instanceof Error ? error.message : "Please check your key and try again.",
+      });
+    } finally {
+      setIsKeyValidating(false);
     }
   };
+
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -473,7 +507,10 @@ export default function CompliancePage() {
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleApiKeySave}>Save Key</AlertDialogAction>
+            <AlertDialogAction onClick={handleApiKeySave} disabled={isKeyValidating}>
+              {isKeyValidating && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+              Save Key
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
